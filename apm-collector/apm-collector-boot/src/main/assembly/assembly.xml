@@ -1,9 +1,10 @@
 <!--
-  ~ Copyright 2017, OpenSkywalking Organization All rights reserved.
-  ~
-  ~ Licensed under the Apache License, Version 2.0 (the "License");
-  ~ you may not use this file except in compliance with the License.
-  ~ You may obtain a copy of the License at
+  ~ Licensed to the Apache Software Foundation (ASF) under one or more
+  ~ contributor license agreements.  See the NOTICE file distributed with
+  ~ this work for additional information regarding copyright ownership.
+  ~ The ASF licenses this file to You under the Apache License, Version 2.0
+  ~ (the "License"); you may not use this file except in compliance with
+  ~ the License.  You may obtain a copy of the License at
   ~
   ~     http://www.apache.org/licenses/LICENSE-2.0
   ~
@@ -13,7 +14,6 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   ~
-  ~ Project repository: https://github.com/OpenSkywalking/skywalking
   -->
 
 <assembly
@@ -22,8 +22,8 @@
     xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2 http://maven.apache.org/xsd/assembly-1.1.2.xsd">
     <id></id>
     <formats>
-        <format>tar.gz</format>
         <format>zip</format>
+        <format>tar.gz</format>
     </formats>
     <dependencySets>
         <dependencySet>
@@ -43,26 +43,25 @@
         </fileSet>
         <fileSet>
             <directory>src/main/resources</directory>
+            <outputDirectory>/config</outputDirectory>
             <includes>
                 <include>application.yml</include>
-
             </includes>
-            <outputDirectory>/config</outputDirectory>
         </fileSet>
         <fileSet>
             <directory>src/main/assembly</directory>
+            <outputDirectory>/config</outputDirectory>
             <includes>
                 <include>log4j2.xml</include>
             </includes>
-            <outputDirectory>/config</outputDirectory>
         </fileSet>
-
         <fileSet>
-            <directory>${project.build.directory}</directory>
-            <outputDirectory>/libs</outputDirectory>
+            <directory>src/main/resources</directory>
             <includes>
-                <include>${build.finalName}.jar</include>
+                <include>application.yml</include>
+                <include>log4j2.xml</include>
             </includes>
+            <outputDirectory>/config</outputDirectory>
         </fileSet>
     </fileSets>
 </assembly>

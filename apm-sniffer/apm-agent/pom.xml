@@ -1,9 +1,10 @@
 <!--
-  ~ Copyright 2017, OpenSkywalking Organization All rights reserved.
-  ~
-  ~ Licensed under the Apache License, Version 2.0 (the "License");
-  ~ you may not use this file except in compliance with the License.
-  ~ You may obtain a copy of the License at
+  ~ Licensed to the Apache Software Foundation (ASF) under one or more
+  ~ contributor license agreements.  See the NOTICE file distributed with
+  ~ this work for additional information regarding copyright ownership.
+  ~ The ASF licenses this file to You under the Apache License, Version 2.0
+  ~ (the "License"); you may not use this file except in compliance with
+  ~ the License.  You may obtain a copy of the License at
   ~
   ~     http://www.apache.org/licenses/LICENSE-2.0
   ~
@@ -13,7 +14,6 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   ~
-  ~ Project repository: https://github.com/OpenSkywalking/skywalking
   -->
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -21,9 +21,9 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.skywalking</groupId>
+        <groupId>org.apache.skywalking</groupId>
         <artifactId>apm-sniffer</artifactId>
-        <version>3.2.3-2017</version>
+        <version>5.0.0-alpha</version>
     </parent>
 
     <artifactId>apm-agent</artifactId>
@@ -34,7 +34,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <premain.class>org.skywalking.apm.agent.SkyWalkingAgent</premain.class>
+        <premain.class>org.apache.skywalking.apm.agent.SkyWalkingAgent</premain.class>
         <shade.net.bytebuddy.source>net.bytebuddy</shade.net.bytebuddy.source>
         <shade.net.bytebuddy.target>${shade.package}.${shade.net.bytebuddy.source}</shade.net.bytebuddy.target>
     </properties>
@@ -42,7 +42,7 @@
     <dependencies>
         <!-- plugin -->
         <dependency>
-            <groupId>org.skywalking</groupId>
+            <groupId>org.apache.skywalking</groupId>
             <artifactId>apm-agent-core</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -123,11 +123,5 @@
         </plugins>
     </build>
 
-    <distributionManagement>
-        <repository>
-            <id>bintray-wu-sheng-sky-walking-repository</id>
-            <name>wu-sheng-sky-walking-repository</name>
-            <url>https://api.bintray.com/maven/wu-sheng/skywalking/org.skywalking.apm-agent/;publish=1</url>
-        </repository>
-    </distributionManagement>
+
 </project>

@@ -1,39 +1,41 @@
-Sky Walking | [English](README.md)
+Apache SkyWalking | [English](README.md)
 ==========
 
 <img src="https://skywalkingtest.github.io/page-resources/3.0/skywalking.png" alt="Sky Walking logo" height="90px" align="right" />
 
-**SkyWalking 3**: 针对分布式系统的APM系统，也被称为分布式追踪系统
+**SkyWalking**: 针对分布式系统的APM（应用性能监控）系统，特别针对微服务、cloud native和容器化(Docker, K8s, Mesos)架构，
+其核心是个分布式追踪系统。
 
-[![Build Status](https://travis-ci.org/OpenSkywalking/skywalking.svg?branch=master)](https://travis-ci.org/OpenSkywalking/skywalking)
-[![Coverage Status](https://coveralls.io/repos/github/OpenSkywalking/skywalking/badge.svg?branch=master&forceUpdate=2)](https://coveralls.io/github/OpenSkywalking/skywalking?branch=master)
+[![Build Status](https://travis-ci.org/apache/incubator-skywalking.svg?branch=master)](https://travis-ci.org/apache/incubator-skywalking)
+[![Coverage Status](https://coveralls.io/repos/github/apache/incubator-skywalking/badge.svg?branch=master&u=1)](https://coveralls.io/github/apache/incubator-skywalking?branch=master)
 [![Join the chat at https://gitter.im/openskywalking/Lobby](https://badges.gitter.im/openskywalking/Lobby.svg)](https://gitter.im/openskywalking/Lobby)
 [![OpenTracing-1.x Badge](https://img.shields.io/badge/OpenTracing--1.x-enabled-blue.svg)](http://opentracing.io)
 
 
 * Java自动探针，**不需要修改应用程序源代码**
   * 高性能探针，针对单实例5000tps的应用，在**全量采集的情况下**，只增加**10%**的CPU开销。
-  * [中间件，框架与类库支持列表](https://github.com/wu-sheng/sky-walking/wiki/3.2-supported-list).
+  * [中间件，框架与类库支持列表](docs/Supported-list.md).
 * 手动探针
   * [使用OpenTracing手动探针API](http://opentracing.io/documentation/pages/supported-tracers)
-  * 使用 [**@Trace**](https://github.com/wu-sheng/OpenSkywalking/wiki/sky-walking-application-toolkit-trace-chn) 标注追踪业务方法
+  * 使用 [**@Trace**](docs/cn/Application-toolkit-trace-CN.md) 标注追踪业务方法
   * 将 traceId 集成到 log4j, log4j2 或 logback这些日志组件中
 * 纯Java后端Collector实现，提供RESTful和gRPC接口。兼容接受其他语言探针发送数据 
-  * [如何将探针的Metric和Trace数据上传到Collector？]()
-* UI工程请查看 [skywalking-ui](https://github.com/OpenSkywalking/skywalking-ui)
+  * [如何将探针的Metric和Trace数据上传到Collector？](/docs/cn/How-to-communicate-with-the-collector-CN.md)
+* UI工程请查看 [skywalking-ui](https://github.com/apache/incubator-skywalking-ui)
 * 中文QQ群：392443393
 
-# Architecture
-* 3.2+版本架构图
-<img src="https://skywalkingtest.github.io/page-resources/3.x-architecture.jpg"/>
-
 # Document
-* [WIKI](https://github.com/OpenSkywalking/skywalking/wiki)
+[![EN doc](https://img.shields.io/badge/document-English-blue.svg)](docs/README.md) [![cn doc](https://img.shields.io/badge/文档-中文版-blue.svg)](docs/README_ZH.md)
 
-This project adheres to the Contributor Covenant [code of conduct](CODE_OF_CONDUCT.md). By participating, you are expected to uphold this code. Please report unacceptable behavior to wu.sheng@foxmail.com.
+
+# 5.x Architecture
+<img src="https://skywalkingtest.github.io/page-resources/5.0/architecture.png"/>
+
+# code of conduct
+This project adheres to the Contributor Covenant [code of conduct](CODE_OF_CONDUCT.md). By participating, you are expected to uphold this code. Please report unacceptable behavior to wusheng@apache.org.
 
 # Screenshots
-- 追踪基于 dubbox 和 [motan](https://github.com/weibocom/motan)的分布式系统，生成的拓扑截图
+- 分布式系统拓扑图自动发现
 <img src="https://skywalkingtest.github.io/page-resources/3.2.1/topological_graph_test_project.png?forceUpdate=0"/>
 
 - 调用链查询
@@ -60,15 +62,8 @@ This project adheres to the Contributor Covenant [code of conduct](CODE_OF_CONDU
 
 # Contact Us
 * 直接提交Issue
-* [Gitter](https://gitter.im/sky-walking/Lobby)
-* [Google Mailing List](https://groups.google.com/forum/#!forum/skywalking-distributed-tracing-and-apm)
+* [Gitter](https://gitter.im/openskywalking/Lobby)
 * QQ群: 392443393
-
-# Open Skywalking Organization
-[Open Skywalking Organization Teams and Contributors](https://github.com/OpenSkywalking/Organization/blob/master/README.md)
-
-# Partners
-<img src="https://skywalkingtest.github.io/page-resources/3.2.3/partners.png" width="600"/>
 
 # License
 [Apache 2.0 License.](/LICENSE)

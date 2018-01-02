@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright 2017, OpenSkywalking Organization All rights reserved.
-  ~
-  ~ Licensed under the Apache License, Version 2.0 (the "License");
-  ~ you may not use this file except in compliance with the License.
-  ~ You may obtain a copy of the License at
+  ~ Licensed to the Apache Software Foundation (ASF) under one or more
+  ~ contributor license agreements.  See the NOTICE file distributed with
+  ~ this work for additional information regarding copyright ownership.
+  ~ The ASF licenses this file to You under the Apache License, Version 2.0
+  ~ (the "License"); you may not use this file except in compliance with
+  ~ the License.  You may obtain a copy of the License at
   ~
   ~     http://www.apache.org/licenses/LICENSE-2.0
   ~
@@ -14,7 +15,6 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   ~
-  ~ Project repository: https://github.com/OpenSkywalking/skywalking
   -->
 
 <Configuration status="debug">
@@ -26,8 +26,10 @@
     <Loggers>
         <logger name="org.eclipse.jetty" level="INFO"/>
         <logger name="org.apache.zookeeper" level="INFO"/>
-        <logger name="org.skywalking.apm.collector.agentstream.worker.storage.PersistenceTimer" level="INFO"/>
-        <logger name="io.grpc.netty.NettyServerHandler" level="INFO"/>
+        <logger name="org.elasticsearch.common.network.IfConfig" level="INFO"/>
+        <logger name="org.apache.skywalking.apm.collector.agent.grpc.handler.JVMMetricsServiceHandler" level="INFO"/>
+        <logger name="org.apache.skywalking.apm.collector.stream.timer.PersistenceTimer" level="INFO"/>
+        <logger name="io.grpc.netty" level="INFO"/>
         <Root level="debug">
             <AppenderRef ref="Console"/>
         </Root>
