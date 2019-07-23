@@ -16,7 +16,6 @@
  *
  */
 
-
 package org.apache.skywalking.apm.plugin.jdbc.connectionurl.parser;
 
 import org.apache.skywalking.apm.network.trace.component.ComponentsDefine;
@@ -24,11 +23,6 @@ import org.apache.skywalking.apm.plugin.jdbc.trace.ConnectionInfo;
 
 /**
  * {@link MysqlURLParser} parse connection url of mysql.
- * <p>
- * The {@link ConnectionInfo#host} be set the string between charset "//" and the first
- * charset "/" after the charset "//", and {@link ConnectionInfo#databaseName} be set the
- * string between the last index of "/" and the first charset "?". but one more thing, the
- * {@link ConnectionInfo#hosts} be set if the host container multiple host.
  *
  * @author zhangxin
  */
@@ -45,7 +39,30 @@ public class MysqlURLParser extends AbstractURLParser {
     protected URLLocation fetchDatabaseHostsIndexRange() {
         int hostLabelStartIndex = url.indexOf("//");
         int hostLabelEndIndex = url.indexOf("/", hostLabelStartIndex + 2);
+        if (hostLabelEndIndex == -1) {
+            hostLabelEndIndex = url.indexOf("?", hostLabelStartIndex + 2);
+        }
         return new URLLocation(hostLabelStartIndex + 2, hostLabelEndIndex);
+    }
+
+    protected String fetchDatabaseNameFromURL(int startSize) {
+        URLLocation hostsLocation = fetchDatabaseNameIndexRange(startSize);
+        if (hostsLocation == null) {
+            return "";
+        }
+        return url.substring(hostsLocation.startIndex(), hostsLocation.endIndex());
+    }
+
+    protected URLLocation fetchDatabaseNameIndexRange(int startSize) {
+        int databaseStartTag = url.indexOf("/", startSize);
+        if (databaseStartTag == -1) {
+            return null;
+        }
+        int databaseEndTag = url.indexOf("?", databaseStartTag);
+        if (databaseEndTag == -1) {
+            databaseEndTag = url.length();
+        }
+        return new URLLocation(databaseStartTag + 1, databaseEndTag);
     }
 
     @Override
@@ -67,18 +84,18 @@ public class MysqlURLParser extends AbstractURLParser {
             StringBuilder sb = new StringBuilder();
             for (String host : hostSegment) {
                 if (host.split(":").length == 1) {
-                    sb.append(host + ":" + DEFAULT_PORT + ",");
+                    sb.append(host).append(":").append(DEFAULT_PORT).append(",");
                 } else {
-                    sb.append(host + ",");
+                    sb.append(host).append(",");
                 }
             }
-            return new ConnectionInfo(ComponentsDefine.MYSQL, DB_TYPE, sb.toString(), fetchDatabaseNameFromURL());
+            return new ConnectionInfo(ComponentsDefine.MYSQL_JDBC_DRIVER, DB_TYPE, sb.substring(0, sb.length() - 1), fetchDatabaseNameFromURL());
         } else {
             String[] hostAndPort = hostSegment[0].split(":");
             if (hostAndPort.length != 1) {
-                return new ConnectionInfo(ComponentsDefine.MYSQL, DB_TYPE, hostAndPort[0], Integer.valueOf(hostAndPort[1]), fetchDatabaseNameFromURL());
+                return new ConnectionInfo(ComponentsDefine.MYSQL_JDBC_DRIVER, DB_TYPE, hostAndPort[0], Integer.valueOf(hostAndPort[1]), fetchDatabaseNameFromURL(location.endIndex()));
             } else {
-                return new ConnectionInfo(ComponentsDefine.MYSQL, DB_TYPE, hostAndPort[0], DEFAULT_PORT, fetchDatabaseNameFromURL());
+                return new ConnectionInfo(ComponentsDefine.MYSQL_JDBC_DRIVER, DB_TYPE, hostAndPort[0], DEFAULT_PORT, fetchDatabaseNameFromURL(location.endIndex()));
             }
         }
     }

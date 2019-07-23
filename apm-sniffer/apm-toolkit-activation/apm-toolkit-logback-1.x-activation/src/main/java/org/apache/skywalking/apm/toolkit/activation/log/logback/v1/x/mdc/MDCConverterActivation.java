@@ -27,12 +27,17 @@ import org.apache.skywalking.apm.agent.core.plugin.interceptor.ConstructorInterc
 import org.apache.skywalking.apm.agent.core.plugin.match.ClassMatch;
 
 import static net.bytebuddy.matcher.ElementMatchers.named;
+import static org.apache.skywalking.apm.agent.core.plugin.bytebuddy.ArgumentTypeNameMatch.takesArgumentWithType;
 
 /**
  * Support MDC https://logback.qos.ch/manual/mdc.html
  * @author: zhangkewei
  */
 public class MDCConverterActivation extends ClassInstanceMethodsEnhancePluginDefine {
+
+    public static final String INTERCEPT_CLASS = "org.apache.skywalking.apm.toolkit.activation.log.logback.v1.x.mdc.PrintMDCTraceIdInterceptor";
+    public static final String ENHANCE_CLASS = "org.apache.skywalking.apm.toolkit.log.logback.v1.x.mdc.LogbackMDCPatternConverter";
+    public static final String ENHANCE_METHOD = "convertTID";
 
     @Override
     protected ConstructorInterceptPoint[] getConstructorsInterceptPoints() {
@@ -45,12 +50,12 @@ public class MDCConverterActivation extends ClassInstanceMethodsEnhancePluginDef
             new InstanceMethodsInterceptPoint() {
                 @Override
                 public ElementMatcher<MethodDescription> getMethodsMatcher() {
-                    return named("convertTID");
+                    return named(ENHANCE_METHOD).and(takesArgumentWithType(0,"ch.qos.logback.classic.spi.ILoggingEvent"));
                 }
 
                 @Override
                 public String getMethodsInterceptor() {
-                    return "PrintMDCTraceIdInterceptor";
+                    return INTERCEPT_CLASS;
                 }
 
                 @Override public boolean isOverrideArgs() {
@@ -62,6 +67,6 @@ public class MDCConverterActivation extends ClassInstanceMethodsEnhancePluginDef
 
     @Override
     protected ClassMatch enhanceClass() {
-        return NameMatch.byName("org.apache.skywalking.apm.toolkit.log.logback.v1.x.mdc.LogbackMDCPatternConverter");
+        return NameMatch.byName(ENHANCE_CLASS);
     }
 }

@@ -16,7 +16,6 @@
  *
  */
 
-
 package org.apache.skywalking.apm.toolkit.activation.opentracing;
 
 import io.opentracing.Tracer;
@@ -27,18 +26,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import org.apache.skywalking.apm.agent.test.helper.SegmentHelper;
-import org.apache.skywalking.apm.agent.test.tools.SegmentRefAssert;
-import org.apache.skywalking.apm.agent.test.tools.SegmentStorage;
-import org.apache.skywalking.apm.agent.test.tools.SegmentStoragePoint;
-import org.apache.skywalking.apm.agent.test.tools.SpanAssert;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.powermock.modules.junit4.PowerMockRunner;
-import org.powermock.modules.junit4.PowerMockRunnerDelegate;
+import org.apache.skywalking.apm.agent.core.conf.Config;
 import org.apache.skywalking.apm.agent.core.context.ContextSnapshot;
 import org.apache.skywalking.apm.agent.core.context.SW3CarrierItem;
 import org.apache.skywalking.apm.agent.core.context.ids.ID;
@@ -46,7 +34,12 @@ import org.apache.skywalking.apm.agent.core.context.trace.AbstractTracingSpan;
 import org.apache.skywalking.apm.agent.core.context.trace.TraceSegment;
 import org.apache.skywalking.apm.agent.core.context.trace.TraceSegmentRef;
 import org.apache.skywalking.apm.agent.core.plugin.interceptor.enhance.EnhancedInstance;
+import org.apache.skywalking.apm.agent.test.helper.SegmentHelper;
 import org.apache.skywalking.apm.agent.test.tools.AgentServiceRule;
+import org.apache.skywalking.apm.agent.test.tools.SegmentRefAssert;
+import org.apache.skywalking.apm.agent.test.tools.SegmentStorage;
+import org.apache.skywalking.apm.agent.test.tools.SegmentStoragePoint;
+import org.apache.skywalking.apm.agent.test.tools.SpanAssert;
 import org.apache.skywalking.apm.agent.test.tools.TracingSegmentRunner;
 import org.apache.skywalking.apm.toolkit.activation.opentracing.continuation.ActivateInterceptor;
 import org.apache.skywalking.apm.toolkit.activation.opentracing.continuation.ConstructorInterceptor;
@@ -60,12 +53,20 @@ import org.apache.skywalking.apm.toolkit.opentracing.SkywalkingContinuation;
 import org.apache.skywalking.apm.toolkit.opentracing.SkywalkingSpan;
 import org.apache.skywalking.apm.toolkit.opentracing.SkywalkingSpanBuilder;
 import org.apache.skywalking.apm.toolkit.opentracing.TextMapContext;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.powermock.modules.junit4.PowerMockRunner;
+import org.powermock.modules.junit4.PowerMockRunnerDelegate;
 
+import static org.apache.skywalking.apm.agent.test.tools.SpanAssert.assertComponent;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.apache.skywalking.apm.agent.test.tools.SpanAssert.assertComponent;
 
 @RunWith(PowerMockRunner.class)
 @PowerMockRunnerDelegate(TracingSegmentRunner.class)
@@ -104,6 +105,7 @@ public class SkywalkingSpanActivationTest {
 
     @Before
     public void setUp() {
+        Config.Agent.ACTIVE_V1_HEADER = true;
         spanBuilder = new SkywalkingSpanBuilder("test").withTag(Tags.COMPONENT.getKey(), "test");
         constructorWithSpanBuilderInterceptor = new ConstructorWithSpanBuilderInterceptor();
         spanLogInterceptor = new SpanLogInterceptor();
@@ -121,6 +123,11 @@ public class SkywalkingSpanActivationTest {
 
         constructorInterceptor = new ConstructorInterceptor();
         activateInterceptor = new ActivateInterceptor();
+    }
+
+    @After
+    public void clear() {
+        Config.Agent.ACTIVE_V1_HEADER = false;
     }
 
     @Test
@@ -192,11 +199,13 @@ public class SkywalkingSpanActivationTest {
 
         final Map<String, String> values = new HashMap<String, String>();
         TextMap carrier = new TextMap() {
-            @Override public Iterator<Map.Entry<String, String>> iterator() {
+            @Override
+            public Iterator<Map.Entry<String, String>> iterator() {
                 return null;
             }
 
-            @Override public void put(String key, String value) {
+            @Override
+            public void put(String key, String value) {
                 values.put(key, value);
             }
 
@@ -219,11 +228,13 @@ public class SkywalkingSpanActivationTest {
         startSpan();
         final Map<String, String> values = new HashMap<String, String>();
         TextMap carrier = new TextMap() {
-            @Override public Iterator<Map.Entry<String, String>> iterator() {
+            @Override
+            public Iterator<Map.Entry<String, String>> iterator() {
                 return values.entrySet().iterator();
             }
 
-            @Override public void put(String key, String value) {
+            @Override
+            public void put(String key, String value) {
                 values.put(key, value);
             }
 
@@ -255,11 +266,13 @@ public class SkywalkingSpanActivationTest {
 
         final Map<String, String> values = new HashMap<String, String>();
         TextMap carrier = new TextMap() {
-            @Override public Iterator<Map.Entry<String, String>> iterator() {
+            @Override
+            public Iterator<Map.Entry<String, String>> iterator() {
                 return values.entrySet().iterator();
             }
 
-            @Override public void put(String key, String value) {
+            @Override
+            public void put(String key, String value) {
                 values.put(key, value);
             }
 
@@ -284,7 +297,8 @@ public class SkywalkingSpanActivationTest {
         constructorInterceptor.onConstruct(continuationHolder, null);
         assertTrue(continuationHolder.getSkyWalkingDynamicField() instanceof ContextSnapshot);
         new Thread() {
-            @Override public void run() {
+            @Override
+            public void run() {
                 MockEnhancedInstance enhancedInstance = new MockEnhancedInstance();
                 try {
                     startSpan(enhancedInstance);
@@ -341,11 +355,13 @@ public class SkywalkingSpanActivationTest {
     private class MockEnhancedInstance implements EnhancedInstance {
         public Object object;
 
-        @Override public Object getSkyWalkingDynamicField() {
+        @Override
+        public Object getSkyWalkingDynamicField() {
             return object;
         }
 
-        @Override public void setSkyWalkingDynamicField(Object value) {
+        @Override
+        public void setSkyWalkingDynamicField(Object value) {
             this.object = value;
         }
     }

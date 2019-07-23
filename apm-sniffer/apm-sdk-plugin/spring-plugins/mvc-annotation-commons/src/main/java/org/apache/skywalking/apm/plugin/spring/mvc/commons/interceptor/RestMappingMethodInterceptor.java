@@ -16,25 +16,21 @@
  *
  */
 
-
 package org.apache.skywalking.apm.plugin.spring.mvc.commons.interceptor;
 
+import org.springframework.web.bind.annotation.*;
+
 import java.lang.reflect.Method;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 
 /**
  * The <code>RestMappingMethodInterceptor</code> only use the first mapping value.
- * it will inteceptor with
+ * it will interceptor with
  * <code>@GetMapping</code>, <code>@PostMapping</code>, <code>@PutMapping</code>
  * <code>@DeleteMapping</code>, <code>@PatchMapping</code>
  *
  * @author clevertension
  */
-public class RestMappingMethodInterceptor extends AbstractMethodInteceptor {
+public class RestMappingMethodInterceptor extends AbstractMethodInterceptor {
     @Override
     public String getRequestURL(Method method) {
         String requestURL = "";
@@ -75,5 +71,10 @@ public class RestMappingMethodInterceptor extends AbstractMethodInteceptor {
             }
         }
         return requestURL;
+    }
+
+    @Override
+    public String getAcceptedMethodTypes(Method method) {
+        return "";
     }
 }

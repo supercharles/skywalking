@@ -1,65 +1,118 @@
-Apache SkyWalking | [中文](README_ZH.md)
+Apache SkyWalking
 ==========
 
-<img src="https://skywalkingtest.github.io/page-resources/3.0/skywalking.png" alt="Sky Walking logo" height="90px" align="right" />
+<img src="http://skywalking.apache.org/assets/logo.svg" alt="Sky Walking logo" height="90px" align="right" />
 
-**SkyWalking**: APM (application performance monitor) tool for distributed systems, especially designed for 
-microservices, cloud native and container-based (Docker, K8s, Mesos) architectures.
-Underlying technology is a distributed tracing system.
+**SkyWalking**: an APM(application performance monitor) system, especially designed for
+microservices, cloud native and container-based (Docker, Kubernetes, Mesos) architectures.
 
-[![Build Status](https://travis-ci.org/apache/incubator-skywalking.svg?branch=master)](https://travis-ci.org/apache/incubator-skywalking)
-[![Coverage Status](https://coveralls.io/repos/github/apache/incubator-skywalking/badge.svg?branch=master&u=1)](https://coveralls.io/github/apache/incubator-skywalking?branch=master)
-[![Join the chat at https://gitter.im/sky-walking/Lobby](https://badges.gitter.im/openskywalking/Lobby.svg)](https://gitter.im/openskywalking/Lobby)
-[![OpenTracing-1.x Badge](https://img.shields.io/badge/OpenTracing--1.x-enabled-blue.svg)](http://opentracing.io)
+[![GitHub stars](https://img.shields.io/github/stars/apache/skywalking.svg?style=for-the-badge&label=Stars&logo=github)](https://github.com/apache/skywalking)
+[![Twitter Follow](https://img.shields.io/twitter/follow/asfskywalking.svg?style=for-the-badge&label=Follow&logo=twitter)](https://twitter.com/AsfSkyWalking)
 
-* Provide Java agent, **no need to CHANGE any application source code**.
-  * High performance agent. Only increase extra **10%** cpu cost in 5000+ tps application, even **when collect all traces**.
-  * [Supported middlewares, frameworks and libraries](docs/Supported-list.md).
-* Manual instrumentation
-  * As an [OpenTracing supported tracer](http://opentracing.io/documentation/pages/supported-tracers)
-  * Use **@Trace** annotation for any methods you want to trace.
-  * Integrate traceId into logs for log4j, log4j2 and logback.
-* Pure Java server implementation, provide RESTful and gRPC services. Compatibility with other language agents/SDKs. 
-* The UI released on [skywalking-ui](https://github.com/apache/incubator-skywalking-ui)
+
+[![Maven Central](https://img.shields.io/maven-central/v/org.apache.skywalking/apache-skywalking-apm.svg)](http://skywalking.apache.org/downloads/)
+[![Build Status](https://travis-ci.org/apache/skywalking.svg?branch=master)](https://travis-ci.org/apache/skywalking)
+
+# Abstract
+**SkyWalking** is an open source APM system, including monitoring, tracing, diagnosing capabilities for distributed system
+in Cloud Native architecture.
+The core features are following.
+
+- Service, service instance, endpoint metrics analysis
+- Root cause analysis
+- Service topology map analysis
+- Service, service instance and endpoint dependency analysis
+- Slow services and endpoints detected
+- Performance optimization
+- Distributed tracing and context propagation
+- Database access metrics. Detect slow database access statements(including SQL statements).
+- Alarm
+
+
+<img src="http://skywalking.apache.org/assets/frame.jpeg?u=20190518"/>
+
+SkyWalking supports to collect telemetry (traces and metrics) data from multiple sources
+and multiple formats,
+including
+1. Java, [.NET Core](https://github.com/SkyAPM/SkyAPM-dotnet), [NodeJS](https://github.com/SkyAPM/SkyAPM-nodejs) and [PHP](https://github.com/SkyAPM/SkyAPM-php-sdk) auto-instrument agents in SkyWalking format
+1. Manual-instrument [Go agent](https://github.com/tetratelabs/go2sky) in SkyWalking format.
+1. Istio telemetry format
+1. Envoy gRPC Access Log Service (ALS) format in Istio controlled service mesh
+1. Envoy Metrics Service format.
+1. Zipkin v1/v2 format.
+1. Jaeger gRPC format.
+
 
 # Document
-[![EN doc](https://img.shields.io/badge/document-English-blue.svg)](docs/README.md) [![cn doc](https://img.shields.io/badge/文档-中文版-blue.svg)](docs/README_ZH.md)
+- [6.x Documents](docs/README.md).
 
-# 5.x Architecture
-<img src="https://skywalkingtest.github.io/page-resources/5.0/architecture.png"/>
+
+# Downloads
+Please head to the [releases page](http://skywalking.apache.org/downloads/) to download a release of Apache SkyWalking.
+
 
 # Code of conduct
-This project adheres to the Contributor Covenant [code of conduct](CODE_OF_CONDUCT.md). By participating, you are expected to uphold this code. Please report unacceptable behavior to wusheng@apache.org.
+This project adheres to the Contributor Covenant [code of conduct](CODE_OF_CONDUCT.md). By participating, you are expected to uphold this code.
+Please follow the [REPORTING GUIDELINES](CODE_OF_CONDUCT.md#reporting-guidelines) to report unacceptable behavior.
 
-# Screenshots
-- Discovery topological graph of application clusters automatically.
-<img src="https://skywalkingtest.github.io/page-resources/3.2.1/topological_graph_test_project.png"/>
+# Live Demo
+Host in Beijing. Go to [demo](http://106.75.237.45:8080/).
 
-- Trace query.
-<img src="https://skywalkingtest.github.io/page-resources/3.2.1/trace_segment.png"/>
+**Video on youtube.com**
 
-- Span detail.
-<img src="https://skywalkingtest.github.io/page-resources/3.2.1/span.png" />
+[![RocketBot UI](http://img.youtube.com/vi/JC-Anlshqx8/0.jpg)](http://www.youtube.com/watch?v=JC-Anlshqx8)
 
-- Instance Overview.
-<img src="https://skywalkingtest.github.io/page-resources/3.2.1/instance_health.png"/>
 
-- JVM Detail.
-<img src="https://skywalkingtest.github.io/page-resources/3.2/instance_graph.png"/>
+# Screenshot
+<table>
+  <tr>
+    <td width="100%" align="center" colspan="2"><b>Dashboard</b></td>
+  </tr>
+  <tr>
+    <td><img src="http://skywalking.apache.org/screenshots/6.1.0/dashboard-1.png"/></td>
+    <td><img src="http://skywalking.apache.org/screenshots/6.1.0/dashboard-2.png"/></td>
+  </tr>
+  <tr>
+      <td width="50%" align="center"><b>Topology Map</b></td>
+      <td width="50%" align="center"><b>Trace</b></td>
+  </tr>
+  <tr>
+     <td><img src="http://skywalking.apache.org/screenshots/6.1.0/topology.png"/></td>
+     <td><img src="http://skywalking.apache.org/screenshots/6.1.0/trace.png"/></td>
+  </tr>
+</table>
 
-- Services Dependency Tree.
-<img src="https://skywalkingtest.github.io/page-resources/3.2.1/service_dependency_tree.png"/>
-
-# Test reports
-- Automatic integration test reports
-  - [Java Agent test report](https://github.com/SkywalkingTest/agent-integration-test-report)
-- Performance test reports
-  - [Java Agent test report](https://skywalkingtest.github.io/Agent-Benchmarks/)
+# Compiling project
+Follow this [document](docs/en/guides/How-to-build.md).
 
 # Contact Us
-* Submit an issue
-* [Gitter](https://gitter.im/openskywalking/Lobby)
-* QQ Group: 392443393
+* Submit an [issue](https://github.com/apache/skywalking/issues)
+* Mail list: **dev@skywalking.apache.org**. Mail to `dev-subscribe@skywalking.apache.org`, follow the reply to subscribe the mail list.
+* Join `#skywalking` channel at [Apache Slack](https://join.slack.com/t/the-asf/shared_invite/enQtNDQ3OTEwNzE1MDg5LWY2NjkwMTEzMGI2ZTI1NzUzMDk0MzJmMWM1NWVmODg0MzBjNjAxYzUwMjIwNDI3MjlhZWRjNmNhOTM5NmIxNDk)
+* QQ Group: 392443393(2000/2000, not available), 901167865(available)
+
+# Who Uses SkyWalking?
+A wide variety of companies and organizations use SkyWalking for research, production and commercial product.
+Here is the **User Wall** of SkyWalking.
+
+<img src="http://skywalking.apache.org/assets/users-20190422.png"/>
+
+Users are encouraged to add themselves to the [PoweredBy](docs/powered-by.md) page.
+
+# Landscapes
+
+<p align="center">
+<br/><br/>
+<img src="https://landscape.cncf.io/images/left-logo.svg" width="150"/>&nbsp;&nbsp;<img src="https://landscape.cncf.io/images/right-logo.svg" width="200"/>
+<br/><br/>
+SkyWalking enriches the <a href="https://landscape.cncf.io/landscape=observability-and-analysis&license=apache-license-2-0">CNCF CLOUD NATIVE Landscape.
+
+</p>
+
+<p align="center">
+<a href="https://openapm.io"><img src="https://openapm.io/static/media/openapm_logo.svg" width="100"/></a>
+  <br/>Our project enriches the <a href="https://openapm.io">OpenAPM Landscape!</a>
+</p>
 
 # License
 [Apache 2.0 License.](/LICENSE)

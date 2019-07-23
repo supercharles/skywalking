@@ -24,11 +24,6 @@ import org.apache.skywalking.apm.plugin.jdbc.trace.ConnectionInfo;
 
 /**
  * {@link PostgreSQLURLParser} parse connection url of mysql.
- * <p>
- * The {@link ConnectionInfo#host} be set the string between charset "//" and the first
- * charset "/" after the charset "//", and {@link ConnectionInfo#databaseName} be set the
- * string between the last index of "/" and the first charset "?". but one more thing, the
- * {@link ConnectionInfo#hosts} be set if the host container multiple host.
  *
  * @author zhangxin
  */
@@ -72,13 +67,13 @@ public class PostgreSQLURLParser extends AbstractURLParser {
                     sb.append(host + ",");
                 }
             }
-            return new ConnectionInfo(ComponentsDefine.POSTGRESQL, DB_TYPE, sb.toString(), fetchDatabaseNameFromURL());
+            return new ConnectionInfo(ComponentsDefine.POSTGRESQL_DRIVER, DB_TYPE, sb.toString(), fetchDatabaseNameFromURL());
         } else {
             String[] hostAndPort = hostSegment[0].split(":");
             if (hostAndPort.length != 1) {
-                return new ConnectionInfo(ComponentsDefine.POSTGRESQL, DB_TYPE, hostAndPort[0], Integer.valueOf(hostAndPort[1]), fetchDatabaseNameFromURL());
+                return new ConnectionInfo(ComponentsDefine.POSTGRESQL_DRIVER, DB_TYPE, hostAndPort[0], Integer.valueOf(hostAndPort[1]), fetchDatabaseNameFromURL());
             } else {
-                return new ConnectionInfo(ComponentsDefine.POSTGRESQL, DB_TYPE, hostAndPort[0], DEFAULT_PORT, fetchDatabaseNameFromURL());
+                return new ConnectionInfo(ComponentsDefine.POSTGRESQL_DRIVER, DB_TYPE, hostAndPort[0], DEFAULT_PORT, fetchDatabaseNameFromURL());
             }
         }
     }

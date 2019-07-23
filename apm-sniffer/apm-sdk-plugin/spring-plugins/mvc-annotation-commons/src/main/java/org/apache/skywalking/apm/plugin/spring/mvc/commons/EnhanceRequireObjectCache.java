@@ -16,27 +16,15 @@
  *
  */
 
-
 package org.apache.skywalking.apm.plugin.spring.mvc.commons;
 
 import java.lang.reflect.Method;
-import javax.servlet.http.HttpServletResponse;
-import org.springframework.web.context.request.NativeWebRequest;
 
 public class EnhanceRequireObjectCache {
     private PathMappingCache pathMappingCache;
-    private NativeWebRequest nativeWebRequest;
 
     public void setPathMappingCache(PathMappingCache pathMappingCache) {
         this.pathMappingCache = pathMappingCache;
-    }
-
-    public HttpServletResponse getHttpServletResponse() {
-        return (HttpServletResponse)nativeWebRequest.getNativeResponse();
-    }
-
-    public void setNativeWebRequest(NativeWebRequest nativeWebRequest) {
-        this.nativeWebRequest = nativeWebRequest;
     }
 
     public String findPathMapping(Method method) {

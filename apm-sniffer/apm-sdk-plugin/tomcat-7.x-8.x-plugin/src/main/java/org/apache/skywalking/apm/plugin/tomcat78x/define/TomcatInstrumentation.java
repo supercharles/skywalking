@@ -30,11 +30,6 @@ import static net.bytebuddy.matcher.ElementMatchers.named;
 import static org.apache.skywalking.apm.agent.core.plugin.match.NameMatch.byName;
 
 /**
- * {@link TomcatInstrumentation} presents that skywalking using class {@link org.apache.skywalking.apm.plugin.tomcat78x.TomcatInvokeInterceptor} to intercept
- * {@link org.apache.catalina.core.StandardWrapperValve#invoke} and using class {@link
- * org.apache.skywalking.apm.plugin.tomcat78x.TomcatExceptionInterceptor} to intercept {@link
- * org.apache.catalina.core.StandardWrapperValve#exception}.
- *
  * @author zhangxin
  */
 public class TomcatInstrumentation extends ClassInstanceMethodsEnhancePluginDefine {
@@ -42,7 +37,7 @@ public class TomcatInstrumentation extends ClassInstanceMethodsEnhancePluginDefi
     /**
      * Enhance class.
      */
-    private static final String ENHANCE_CLASS = "org.apache.catalina.core.StandardWrapperValve";
+    private static final String ENHANCE_CLASS = "org.apache.catalina.core.StandardHostValve";
 
     /**
      * The intercept class for "invoke" method in the class "org.apache.catalina.core.StandardWrapperValve"
@@ -85,7 +80,7 @@ public class TomcatInstrumentation extends ClassInstanceMethodsEnhancePluginDefi
             },
             new InstanceMethodsInterceptPoint() {
                 @Override public ElementMatcher<MethodDescription> getMethodsMatcher() {
-                    return named("exception");
+                    return named("throwable");
                 }
 
                 @Override public String getMethodsInterceptor() {

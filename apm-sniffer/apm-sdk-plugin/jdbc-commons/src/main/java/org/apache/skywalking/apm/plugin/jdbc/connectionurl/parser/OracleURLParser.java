@@ -27,13 +27,9 @@ import org.apache.skywalking.apm.util.StringUtil;
 
 /**
  * {@link OracleURLParser} presents that how to parse oracle connection url.
- * <p>
- * The {@link ConnectionInfo#host} be set the string between charset "@" and the last
- * charset ":" after the charset "@", and {@link ConnectionInfo#databaseName} be set the
- * string that after the last index of ":".
- * <p>
+ *
  * Note: {@link OracleURLParser} can parse the commons connection url. the commons
- * connection url is of the form: <code>jdbc:oracle:<drivertype>:@<database></code>,the other
+ * connection url is of the form: <code>jdbc:oracle:(drivertype):@(database)</code>,the other
  * the form of connection url cannot be parsed success.
  *
  * @author zhangxin
@@ -98,16 +94,16 @@ public class OracleURLParser extends AbstractURLParser {
         String[] hostSegment = splitDatabaseAddress(host);
         String databaseName = fetchDatabaseNameFromURL();
         if (hostSegment.length == 1) {
-            return new ConnectionInfo(ComponentsDefine.ORACLE, DB_TYPE, host, DEFAULT_PORT, databaseName);
+            return new ConnectionInfo(ComponentsDefine.OJDBC, DB_TYPE, host, DEFAULT_PORT, databaseName);
         } else {
-            return new ConnectionInfo(ComponentsDefine.ORACLE, DB_TYPE, hostSegment[0], Integer.valueOf(hostSegment[1]), databaseName);
+            return new ConnectionInfo(ComponentsDefine.OJDBC, DB_TYPE, hostSegment[0], Integer.valueOf(hostSegment[1]), databaseName);
         }
     }
 
     private ConnectionInfo tnsNameURLParse() {
         String host = parseDatabaseHostsFromURL();
         String databaseName = fetchDatabaseNameFromURL();
-        return new ConnectionInfo(ComponentsDefine.ORACLE, DB_TYPE, host, databaseName);
+        return new ConnectionInfo(ComponentsDefine.OJDBC, DB_TYPE, host, databaseName);
     }
 
     private String parseDatabaseHostsFromURL() {

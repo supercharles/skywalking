@@ -16,31 +16,33 @@
  *
  */
 
-
 package org.apache.skywalking.apm.plugin.motan.define;
 
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.matcher.ElementMatcher;
+import org.apache.skywalking.apm.agent.core.plugin.interceptor.ConstructorInterceptPoint;
 import org.apache.skywalking.apm.agent.core.plugin.interceptor.InstanceMethodsInterceptPoint;
 import org.apache.skywalking.apm.agent.core.plugin.interceptor.enhance.ClassInstanceMethodsEnhancePluginDefine;
 import org.apache.skywalking.apm.agent.core.plugin.match.ClassMatch;
 import org.apache.skywalking.apm.agent.core.plugin.match.NameMatch;
-import org.apache.skywalking.apm.agent.core.plugin.interceptor.ConstructorInterceptPoint;
-import org.apache.skywalking.apm.plugin.motan.MotanProviderInterceptor;
 
+import static net.bytebuddy.matcher.ElementMatchers.any;
 import static net.bytebuddy.matcher.ElementMatchers.named;
 
-/**
- * {@link MotanConsumerInstrumentation} presents that skywalking intercept {@link com.weibo.api.motan.cluster.support.ClusterSpi#call(com.weibo.api.motan.rpc.Request)}
- * by using {@link MotanProviderInterceptor}.
- *
- * @author zhangxin
- */
 public class MotanConsumerInstrumentation extends ClassInstanceMethodsEnhancePluginDefine {
 
-    private static final String ENHANCE_CLASS = "com.weibo.api.motan.transport.ProviderMessageRouter";
-
-    private static final String INVOKE_INTERCEPT_CLASS = "org.apache.skywalking.apm.plugin.motan.MotanProviderInterceptor";
+    /**
+     * Enhance class.
+     */
+    private static final String ENHANCE_CLASS = "com.weibo.api.motan.rpc.AbstractReferer";
+    /**
+     * Class that intercept all constructor of ${@link com.weibo.api.motan.rpc.AbstractProvider}.
+     */
+    private static final String CONSTRUCTOR_INTERCEPT_CLASS = "org.apache.skywalking.apm.plugin.motan.MotanConsumerInterceptor";
+    /**
+     * Class that intercept {@link com.weibo.api.motan.rpc.AbstractProvider#call(com.weibo.api.motan.rpc.Request)}.
+     */
+    private static final String PROVIDER_INVOKE_INTERCEPT_CLASS = "org.apache.skywalking.apm.plugin.motan.MotanConsumerInterceptor";
 
     @Override
     protected ClassMatch enhanceClass() {
@@ -49,7 +51,19 @@ public class MotanConsumerInstrumentation extends ClassInstanceMethodsEnhancePlu
 
     @Override
     protected ConstructorInterceptPoint[] getConstructorsInterceptPoints() {
-        return new ConstructorInterceptPoint[0];
+        return new ConstructorInterceptPoint[] {
+            new ConstructorInterceptPoint() {
+                @Override
+                public ElementMatcher<MethodDescription> getConstructorMatcher() {
+                    return any();
+                }
+
+                @Override
+                public String getConstructorInterceptor() {
+                    return CONSTRUCTOR_INTERCEPT_CLASS;
+                }
+            }
+        };
     }
 
     @Override
@@ -63,7 +77,7 @@ public class MotanConsumerInstrumentation extends ClassInstanceMethodsEnhancePlu
 
                 @Override
                 public String getMethodsInterceptor() {
-                    return INVOKE_INTERCEPT_CLASS;
+                    return PROVIDER_INVOKE_INTERCEPT_CLASS;
                 }
 
                 @Override public boolean isOverrideArgs() {

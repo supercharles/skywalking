@@ -16,44 +16,72 @@
  *
  */
 
-
 package org.apache.skywalking.apm.plugin.grpc.v1.define;
 
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.matcher.ElementMatcher;
+import org.apache.skywalking.apm.agent.core.plugin.interceptor.StaticMethodsInterceptPoint;
 import org.apache.skywalking.apm.agent.core.plugin.interceptor.enhance.ClassStaticMethodsEnhancePluginDefine;
 import org.apache.skywalking.apm.agent.core.plugin.match.ClassMatch;
-import org.apache.skywalking.apm.agent.core.plugin.match.NameMatch;
-import org.apache.skywalking.apm.agent.core.plugin.interceptor.StaticMethodsInterceptPoint;
 
 import static net.bytebuddy.matcher.ElementMatchers.named;
 import static org.apache.skywalking.apm.agent.core.plugin.bytebuddy.ArgumentTypeNameMatch.takesArgumentWithType;
+import static org.apache.skywalking.apm.agent.core.plugin.match.NameMatch.byName;
 
+/**
+ * @author zhang xin
+ */
 public class ClientCallsInstrumentation extends ClassStaticMethodsEnhancePluginDefine {
+
     private static final String ENHANCE_CLASS = "io.grpc.stub.ClientCalls";
+    private static final String INTERCEPTOR_CLASS = "org.apache.skywalking.apm.plugin.grpc.v1.BlockingCallInterceptor";
+    private static final String FUTURE_INTERCEPTOR_CLASS = "org.apache.skywalking.apm.plugin.grpc.v1.AsyncUnaryRequestCallCallInterceptor";
 
     @Override protected StaticMethodsInterceptPoint[] getStaticMethodsInterceptPoints() {
         return new StaticMethodsInterceptPoint[] {
             new StaticMethodsInterceptPoint() {
                 @Override public ElementMatcher<MethodDescription> getMethodsMatcher() {
-                    return (named("asyncUnaryRequestCall").and(takesArgumentWithType(2,"io.grpc.ClientCall$Listener")))
-                        .or(named("asyncStreamingRequestCall"))
-                        .or(named("blockingUnaryCall"))
-                        .or(named("futureUnaryCall"));
+                    return named("blockingUnaryCall").and(takesArgumentWithType(1, "io.grpc.MethodDescriptor"));
                 }
 
                 @Override public String getMethodsInterceptor() {
-                    return "org.apache.skywalking.apm.plugin.grpc.v1.ClientCallsMethodInterceptor";
+                    return INTERCEPTOR_CLASS;
                 }
 
                 @Override public boolean isOverrideArgs() {
                     return false;
+                }
+            },
+//            new StaticMethodsInterceptPoint() {
+//                @Override public ElementMatcher<MethodDescription> getMethodsMatcher() {
+//                    return named("blockingServerStreamingCall").and(takesArgumentWithType(1, "io.grpc.MethodDescriptor"));
+//                }
+//
+//                @Override public String getMethodsInterceptor() {
+//                    return INTERCEPTOR_CLASS;
+//                }
+//
+//                @Override public boolean isOverrideArgs() {
+//                    return false;
+//                }
+//            },
+            new StaticMethodsInterceptPoint() {
+                @Override public ElementMatcher<MethodDescription> getMethodsMatcher() {
+                    return named("asyncUnaryRequestCall").and(takesArgumentWithType(2, "io.grpc.ClientCall$Listener"));
+                }
+
+                @Override public String getMethodsInterceptor() {
+                    return FUTURE_INTERCEPTOR_CLASS;
+                }
+
+                @Override public boolean isOverrideArgs() {
+                    return true;
                 }
             }
         };
     }
 
     @Override protected ClassMatch enhanceClass() {
-        return NameMatch.byName(ENHANCE_CLASS);
+        return byName(ENHANCE_CLASS);
     }
 }

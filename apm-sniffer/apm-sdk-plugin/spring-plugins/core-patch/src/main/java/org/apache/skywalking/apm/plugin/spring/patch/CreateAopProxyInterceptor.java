@@ -26,7 +26,7 @@ import org.apache.skywalking.apm.agent.core.plugin.interceptor.enhance.MethodInt
 import org.springframework.aop.framework.AdvisedSupport;
 
 /**
- * <code>CreateAopProxyInterceptor</code> check that the bean has been implement {@link EnhancedInstance}. <p/>
+ * <code>CreateAopProxyInterceptor</code> check that the bean has been implement {@link EnhancedInstance}.
  * if yes, true will be returned.
  *
  * @author zhang xin
@@ -44,7 +44,8 @@ public class CreateAopProxyInterceptor implements InstanceMethodsAroundIntercept
         Object ret) throws Throwable {
         AdvisedSupport advisedSupport = (AdvisedSupport)allArguments[0];
 
-        if (EnhancedInstance.class.isAssignableFrom(advisedSupport.getTargetClass())) {
+        Class targetClass = advisedSupport.getTargetClass();
+        if (targetClass != null && EnhancedInstance.class.isAssignableFrom(targetClass)) {
             return true;
         }
         return ret;

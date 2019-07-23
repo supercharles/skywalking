@@ -16,7 +16,6 @@
  *
  */
 
-
 package org.apache.skywalking.apm.agent.core.context.ids;
 
 import java.util.Random;
@@ -42,8 +41,8 @@ public final class GlobalIdGenerator {
      *
      * The second one represents thread id. (most likely just an integer value, would be helpful in protobuf)
      *
-     * The third one also has two parts,<br/>
-     * 1) a timestamp, measured in milliseconds<br/>
+     * The third one also has two parts,
+     * 1) a timestamp, measured in milliseconds
      * 2) a seq, in current thread, between 0(included) and 9999(included)
      *
      * Notice, a long costs 8 bytes, three longs cost 24 bytes. And at the same time, a char costs 2 bytes. So
@@ -53,13 +52,13 @@ public final class GlobalIdGenerator {
      * @return an array contains three long numbers, which represents a unique id.
      */
     public static ID generate() {
-        if (RemoteDownstreamConfig.Agent.APPLICATION_INSTANCE_ID == DictionaryUtil.nullValue()) {
+        if (RemoteDownstreamConfig.Agent.SERVICE_INSTANCE_ID == DictionaryUtil.nullValue()) {
             throw new IllegalStateException();
         }
         IDContext context = THREAD_ID_SEQUENCE.get();
 
         return new ID(
-            RemoteDownstreamConfig.Agent.APPLICATION_INSTANCE_ID,
+            RemoteDownstreamConfig.Agent.SERVICE_INSTANCE_ID,
             Thread.currentThread().getId(),
             context.nextSeq()
         );

@@ -22,16 +22,16 @@ package org.apache.skywalking.apm.agent.core.context.trace;
 import java.util.LinkedList;
 import java.util.List;
 import org.apache.skywalking.apm.agent.core.conf.RemoteDownstreamConfig;
-import org.apache.skywalking.apm.agent.core.context.ids.DistributedTraceIds;
-import org.apache.skywalking.apm.agent.core.context.ids.ID;
 import org.apache.skywalking.apm.agent.core.context.ids.DistributedTraceId;
+import org.apache.skywalking.apm.agent.core.context.ids.DistributedTraceIds;
 import org.apache.skywalking.apm.agent.core.context.ids.GlobalIdGenerator;
+import org.apache.skywalking.apm.agent.core.context.ids.ID;
 import org.apache.skywalking.apm.agent.core.context.ids.NewDistributedTraceId;
-import org.apache.skywalking.apm.network.proto.TraceSegmentObject;
-import org.apache.skywalking.apm.network.proto.UpstreamSegment;
+import org.apache.skywalking.apm.network.language.agent.*;
+import org.apache.skywalking.apm.network.language.agent.v2.SegmentObject;
 
 /**
- * {@link TraceSegment} is a segment or fragment of the distributed trace. {@see https://github.com/opentracing/specification/blob/master/specification.md#the-opentracing-data-model}
+ * {@link TraceSegment} is a segment or fragment of the distributed trace. See https://github.com/opentracing/specification/blob/master/specification.md#the-opentracing-data-model
  * A {@link TraceSegment} means the segment, which exists in current {@link Thread}. And the distributed trace is formed
  * by multi {@link TraceSegment}s, because the distributed trace crosses multi-processes, multi-threads. <p>
  *
@@ -125,8 +125,8 @@ public class TraceSegment {
         return traceSegmentId;
     }
 
-    public int getApplicationId() {
-        return RemoteDownstreamConfig.Agent.APPLICATION_ID;
+    public int getServiceId() {
+        return RemoteDownstreamConfig.Agent.SERVICE_ID;
     }
 
     public boolean hasRef() {
@@ -163,7 +163,7 @@ public class TraceSegment {
         for (DistributedTraceId distributedTraceId : getRelatedGlobalTraces()) {
             upstreamBuilder = upstreamBuilder.addGlobalTraceIds(distributedTraceId.toUniqueId());
         }
-        TraceSegmentObject.Builder traceSegmentBuilder = TraceSegmentObject.newBuilder();
+        SegmentObject.Builder traceSegmentBuilder = SegmentObject.newBuilder();
         /**
          * Trace Segment
          */
@@ -174,8 +174,8 @@ public class TraceSegment {
         for (AbstractTracingSpan span : this.spans) {
             traceSegmentBuilder.addSpans(span.transform());
         }
-        traceSegmentBuilder.setApplicationId(RemoteDownstreamConfig.Agent.APPLICATION_ID);
-        traceSegmentBuilder.setApplicationInstanceId(RemoteDownstreamConfig.Agent.APPLICATION_INSTANCE_ID);
+        traceSegmentBuilder.setServiceId(RemoteDownstreamConfig.Agent.SERVICE_ID);
+        traceSegmentBuilder.setServiceInstanceId(RemoteDownstreamConfig.Agent.SERVICE_INSTANCE_ID);
         traceSegmentBuilder.setIsSizeLimited(this.isSizeLimited);
 
         upstreamBuilder.setSegment(traceSegmentBuilder.build().toByteString());
@@ -193,6 +193,6 @@ public class TraceSegment {
     }
 
     public int getApplicationInstanceId() {
-        return RemoteDownstreamConfig.Agent.APPLICATION_INSTANCE_ID;
+        return RemoteDownstreamConfig.Agent.SERVICE_INSTANCE_ID;
     }
 }

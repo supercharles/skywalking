@@ -31,14 +31,24 @@ import org.apache.skywalking.apm.agent.core.context.trace.SpanLayer;
 import org.apache.skywalking.apm.agent.core.plugin.interceptor.enhance.EnhancedInstance;
 import org.apache.skywalking.apm.agent.core.plugin.interceptor.enhance.InstanceMethodsAroundInterceptor;
 import org.apache.skywalking.apm.agent.core.plugin.interceptor.enhance.MethodInterceptResult;
+import org.apache.skywalking.apm.agent.core.util.MethodUtil;
 import org.apache.skywalking.apm.network.trace.component.ComponentsDefine;
 import org.eclipse.jetty.server.HttpChannel;
 
 public class HandleInterceptor implements InstanceMethodsAroundInterceptor {
+
+    private static boolean IS_SERVLET_GET_STATUS_METHOD_EXIST;
+    private static final String SERVLET_RESPONSE_CLASS = "javax.servlet.http.HttpServletResponse";
+    private static final String GET_STATUS_METHOD = "getStatus";
+
+    static {
+        IS_SERVLET_GET_STATUS_METHOD_EXIST = MethodUtil.isMethodExist(HandleInterceptor.class.getClassLoader(), SERVLET_RESPONSE_CLASS, GET_STATUS_METHOD);
+    }
+
     @Override
     public void beforeMethod(EnhancedInstance objInst, Method method, Object[] allArguments, Class<?>[] argumentsTypes,
         MethodInterceptResult result) throws Throwable {
-        HttpChannel httpChannel = (HttpChannel)allArguments[0];
+        HttpChannel httpChannel = (HttpChannel)objInst;
         HttpServletRequest servletRequest = httpChannel.getRequest();
 
         ContextCarrier contextCarrier = new ContextCarrier();
@@ -59,14 +69,15 @@ public class HandleInterceptor implements InstanceMethodsAroundInterceptor {
     @Override
     public Object afterMethod(EnhancedInstance objInst, Method method, Object[] allArguments, Class<?>[] argumentsTypes,
         Object ret) throws Throwable {
-        HttpChannel httpChannel = (HttpChannel)allArguments[0];
+        HttpChannel httpChannel = (HttpChannel)objInst;
         HttpServletResponse servletResponse = httpChannel.getResponse();
         AbstractSpan span = ContextManager.activeSpan();
-        if (servletResponse.getStatus() >= 400) {
+        if (IS_SERVLET_GET_STATUS_METHOD_EXIST && servletResponse.getStatus() >= 400) {
             span.errorOccurred();
             Tags.STATUS_CODE.set(span, Integer.toString(servletResponse.getStatus()));
         }
         ContextManager.stopSpan();
+        ContextManager.getRuntimeContext().remove(Constants.FORWARD_REQUEST_FLAG);
         return ret;
     }
 

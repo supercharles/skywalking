@@ -100,7 +100,7 @@ public class MongoDBMethodInterceptor implements InstanceMethodsAroundIntercepto
             BsonDocument filter = ((ListCollectionsOperation)obj).getFilter();
             return limitFilter(filter.toString());
         } else if (obj instanceof MapReduceWithInlineResultsOperation) {
-            BsonDocument filter = ((ListCollectionsOperation)obj).getFilter();
+            BsonDocument filter = ((MapReduceWithInlineResultsOperation)obj).getFilter();
             return limitFilter(filter.toString());
         } else if (obj instanceof DeleteOperation) {
             List<DeleteRequest> writeRequestList = ((DeleteOperation)obj).getDeleteRequests();
@@ -174,7 +174,7 @@ public class MongoDBMethodInterceptor implements InstanceMethodsAroundIntercepto
         String executeMethod = arguments[0].getClass().getSimpleName();
         String remotePeer = (String)objInst.getSkyWalkingDynamicField();
         AbstractSpan span = ContextManager.createExitSpan(MONGO_DB_OP_PREFIX + executeMethod, new ContextCarrier(), remotePeer);
-        span.setComponent(ComponentsDefine.MONGODB);
+        span.setComponent(ComponentsDefine.MONGO_DRIVER);
         Tags.DB_TYPE.set(span, DB_TYPE);
         SpanLayer.asDB(span);
 
