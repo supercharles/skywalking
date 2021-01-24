@@ -15,6 +15,7 @@
  * limitations under the License.
  *
  */
+
 package org.apache.skywalking.apm.plugin.solrj.define;
 
 import net.bytebuddy.description.method.MethodDescription;
@@ -29,8 +30,8 @@ import org.apache.skywalking.apm.agent.core.plugin.match.NameMatch;
 public class SolrClientInstrumentation extends ClassInstanceMethodsEnhancePluginDefine {
 
     @Override
-    protected ConstructorInterceptPoint[] getConstructorsInterceptPoints() {
-        return new ConstructorInterceptPoint[]{
+    public ConstructorInterceptPoint[] getConstructorsInterceptPoints() {
+        return new ConstructorInterceptPoint[] {
             new ConstructorInterceptPoint() {
 
                 @Override
@@ -47,8 +48,8 @@ public class SolrClientInstrumentation extends ClassInstanceMethodsEnhancePlugin
     }
 
     @Override
-    protected InstanceMethodsInterceptPoint[] getInstanceMethodsInterceptPoints() {
-        return new InstanceMethodsInterceptPoint[]{
+    public InstanceMethodsInterceptPoint[] getInstanceMethodsInterceptPoints() {
+        return new InstanceMethodsInterceptPoint[] {
             new InstanceMethodsInterceptPoint() {
                 @Override
                 public boolean isOverrideArgs() {

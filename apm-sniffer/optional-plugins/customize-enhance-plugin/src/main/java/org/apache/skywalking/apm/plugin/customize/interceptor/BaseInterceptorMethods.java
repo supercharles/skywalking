@@ -19,20 +19,17 @@
 package org.apache.skywalking.apm.plugin.customize.interceptor;
 
 import org.apache.skywalking.apm.agent.core.context.ContextManager;
+import org.apache.skywalking.apm.agent.core.context.tag.Tags;
 import org.apache.skywalking.apm.agent.core.context.trace.AbstractSpan;
 import org.apache.skywalking.apm.plugin.customize.conf.CustomizeConfiguration;
 import org.apache.skywalking.apm.plugin.customize.conf.MethodConfiguration;
 import org.apache.skywalking.apm.plugin.customize.constants.Constants;
-import org.apache.skywalking.apm.plugin.customize.util.CustomizeExpression;
+import org.apache.skywalking.apm.agent.core.util.CustomizeExpression;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-/**
- * @author zhaoyuguang
- */
 
 class BaseInterceptorMethods {
 
@@ -59,15 +56,14 @@ class BaseInterceptorMethods {
                     }
                 }
                 if (tags != null && !tags.isEmpty()) {
-                    for (String key : tags.keySet()) {
-                        String expression = tags.get(key);
-                        spanTags.put(key, CustomizeExpression.parseExpression(expression, context));
+                    for (Map.Entry<String, String> expression: tags.entrySet()) {
+                        spanTags.put(expression.getKey(), CustomizeExpression.parseExpression(expression.getValue(), context));
                     }
                 }
                 if (logs != null && !logs.isEmpty()) {
-                    for (String key : logs.keySet()) {
-                        String expression = logs.get(key);
-                        spanLogs.put(key, CustomizeExpression.parseExpression(expression, context));
+                    for (Map.Entry<String, String> entries : logs.entrySet()) {
+                        String expression = logs.get(entries.getKey());
+                        spanLogs.put(entries.getKey(), CustomizeExpression.parseExpression(expression, context));
                     }
                 }
                 operationName = operationNameSuffix.insert(0, operationName).toString();
@@ -75,7 +71,7 @@ class BaseInterceptorMethods {
                 AbstractSpan span = ContextManager.createLocalSpan(operationName);
                 if (!spanTags.isEmpty()) {
                     for (Map.Entry<String, String> tag : spanTags.entrySet()) {
-                        span.tag(tag.getKey(), tag.getValue());
+                        span.tag(Tags.ofKey(tag.getKey()), tag.getValue());
                     }
                 }
                 if (!spanLogs.isEmpty()) {
@@ -93,7 +89,7 @@ class BaseInterceptorMethods {
 
     void handleMethodException(Throwable t) {
         if (ContextManager.isActive()) {
-            ContextManager.activeSpan().errorOccurred().log(t);
+            ContextManager.activeSpan().log(t);
         }
     }
 

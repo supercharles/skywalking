@@ -15,13 +15,17 @@ follow the next step to subscribe.
 - Issue report and discussion also could take place in `dev@skywalking.apache.org`. 
 Mail to `dev-subscribe@skywalking.apache.org`, follow the reply to subscribe the mail list. 
 
-
 ## Contact Us
 All the following channels are open to the community, you could choose the way you like.
 * Submit an [issue](https://github.com/apache/skywalking/issues)
 * Mail list: **dev@skywalking.apache.org**. Mail to `dev-subscribe@skywalking.apache.org`, follow the reply to subscribe the mail list.
 * [Gitter](https://gitter.im/openskywalking/Lobby)
 * QQ Group: 392443393
+
+## Become official Apache SkyWalking Committer
+The PMC will assess the contributions of every contributor, including, but not limited to, 
+code contributions, and follow the Apache guides to promote, vote and invite new committer and PMC member.
+Read [Become official Apache SkyWalking Committer](asf/committer.md) to get details.
 
 ## For code developer
 For developers, first step, read [Compiling Guide](How-to-build.md). It teaches developer how to build the project in local and set up the environment.
@@ -50,41 +54,51 @@ Since version 6.3.0, we have introduced more automatic tests to perform software
 > End-to-end testing is a methodology used to test whether the flow of an application is performing as designed from start to finish.
  The purpose of carrying out end-to-end tests is to identify system dependencies and to ensure that the right information is passed between various system components and systems.
 
-The e2e tests involves the OAP server, Web App, and the instrumented services, all of them run in a designed Docker container, connecting to each other; 
-in addition, there is a test controller running outside of the container that sends requests to the instrumented service,
+The e2e test involves some/all of the OAP server, storage, coordinator, webapp, and the instrumented services, all of which are orchestrated by `docker-compose`,
+besides, there is a test controller(JUnit test) running outside of the container that sends traffics to the instrumented service,
 and then verifies the corresponding results after those requests, by GraphQL API of the SkyWalking Web App.
-
-Run the command `./mvnw -f test/e2e/pom.xml clean verify` under the root directory to get an intuition on how they work together(note that it may take a long time).
 
 #### Writing E2E Cases
 
-- Set up environment in Intellij IDEA
+- Set up environment in IntelliJ IDEA
 
-The e2e test is an individual project under the SkyWalking root directory and the IDEA cannot recognize it by default, right click
-on the file `test/e2e/pom.xml` and click `Add as Maven Project`, things should be ready now.
+The e2e test is an separated project under the SkyWalking root directory and the IDEA cannot recognize it by default, right click
+on the file `test/e2e/pom.xml` and click `Add as Maven Project`, things should be ready now. But we recommend to open the directory `skywalking/test/e2e`
+in a separated IDE window for better experience because there may be shaded classes issues.
 
 - Orchestrate the components
 
-Our goal of E2E tests is to test the SkyWalking project in a whole, including the OAP server, Web App, and even the frontend UI(not now),
+Our goal of E2E tests is to test the SkyWalking project in a whole, including the OAP server, storage, coordinator, webapp, and even the frontend UI(not now),
 in single node mode as well as cluster mode, therefore the first step is to determine what case we are going to verify and orchestrate the 
 components.
  
-In order to make it more easily to orchestrate, we're using a [Docker e2e-container](https://github.com/SkyAPMTest/e2e-container) that can run
-OAP server in both standalone and cluster mode, it can also run the given instrumented services. Refer to the repository for more details;
+In order to make it more easily to orchestrate, we're using a [docker-compose](https://docs.docker.com/compose/) that provides a convenient file format (`docker-compose.yml`)
+to orchestrate the needed containers, and gives us possibilities to define the dependencies of the components.
 
 Basically you will need:
-1. (If in cluster mode) start up the third-party service containers that SkyWalking depends on, such as ZooKeeper as coordinator, ElasticSearch as storage, etc. in the docker-maven-plugin;
-1. (If in cluster mode) carefully map the addresses/ports into the e2e-container that can be used by the OAP server to connect to;
-1. Start the OAP server, Web App, and instrumented services in the e2e-container, mount your customized startup script to `/rc.d/` in e2e-container and it gets run when the container starts up;
-1. Use the utilities provided in e2e-container to check the healthiness of the components;
-1. Design the test controller and verify expected result;
+1. Decide what (and how many) containers will be needed, e.g. for cluster testing, you'll need > 2 OAP nodes, coordinators like zookeeper, storage like ElasticSearch, and instrumented services;
+1. Define the containers in `docker-compose.yml`, and carefully specify the dependencies, starting orders, and most importantly, link them together, e.g. set correct OAP address in the agent side, set correct coordinator address in OAP, etc.
+1. Write (or hopefully reuse) the test codes, to verify the results is correct.
 
-We've given a simple example that verifies SkyWalking should work as expected in cluster mode, refer to [the codes](../../../test/e2e/e2e-cluster) for detail.
+As for the last step, we have a friendly framework to help you get started more quickly, which provides annotation `@DockerCompose("docker-compose.yml")` to load/parse and start up all the containers in a proper order,
+`@ContainerHost`/`@ContainerPort` to get the real host/port of the container, `@ContainerHostAndPort` to get both, `@DockerContainer` to get the running container.
 
 - Write test controller
 
 To put it simple, test controllers are basically tests that can be bound to the Maven `integration-test/verify` phase.
 They send **designed** requests to the instrumented service, and expect to get corresponding traces/metrics/metadata from the SkyWalking webapp GraphQL API.
+
+In the test framework, we provide a `TrafficController` to periodically send traffic data to the instrumented services, you can simply enable it by giving a url and traffic data, refer to [../../../test/e2e/e2e-test/src/test/java/org/apache/skywalking/e2e/base/TrafficController.java].
+
+- Troubleshooting
+
+We expose all the logs from all containers to the stdout in non-CI (local) mode, but save/and upload them all to the GitHub server and you can download them (only when tests failed) in the right-up button "Artifacts/Download artifacts/logs" for debugging.
+
+**NOTE:** Please verify the newly-added E2E test case locally first, however, if you find it passed locally but failed in the PR check status, make sure all the updated/newly-added files (especially those in submodules)
+are committed and included in that PR, or reset the git HEAD to the remote and verify locally again.
+
+#### E2E local remote debugging
+When the E2E test is executed locally, if any test case fails, the [E2E local remote debugging function](E2E-local-remote-debug.md) can be used to quickly troubleshoot the bug.
 
 ### Project Extensions
 SkyWalking project supports many ways to extend existing features. If you are interesting in these ways,
@@ -96,15 +110,13 @@ and private plugin developer should read this.
 - If you want to build a new probe or plugin in any language, please read [Component library definition and extension](Component-library-settings.md) document.
 - [Storage extension development guide](storage-extention.md). Help potential contributors to build a new 
 storage implementor besides the official.
-- Customize analysis by oal script. OAL scripts locate in `config/official_analysis.oal`. You could change it and reboot the OAP server. Read 
+- Customize analysis by oal script. OAL scripts locate in `config/oal/*.oal`. You could change it and reboot the OAP server. Read 
 [Observability Analysis Language Introduction](../concepts-and-designs/oal.md) if you need to learn about OAL script.
 - [Source and scope extension for new metrics](source-extension.md). If you want to analysis a new metrics, which SkyWalking
 haven't provide. You need to 
 add a new receiver rather than choosing [existed receiver](../setup/backend/backend-receivers.md).
 At that moment, 
 you most likely need to add a new source and scope. This document will teach you how to do.
-- [Backend Inventory entity extension](inventory-extension.md). If you want to extend SkyWalking inventory entities, and
-want to push upstream back to our Apache OSS repo, please read these principles.
 
 ### UI developer
 Our UI is constituted by static pages and web container.
@@ -115,6 +127,27 @@ It is built with vue + typescript. You could know more at the rocketbot reposito
 static resources and send GraphQL query requests to backend.
 - [Legacy UI repository](https://github.com/apache/skywalking-ui) is still there, but not included
 in SkyWalking release, after 6.0.0-GA.
+
+### OAP backend dependency management
+> This section is only applicable to the dependencies of the backend module
+
+Being one of the Top Level Projects of The Apache Software Foundation (ASF),
+SkyWalking is supposed to follow the [ASF 3RD PARTY LICENSE POLICY](https://apache.org/legal/resolved.html),
+so if you're adding new dependencies to the project, you're responsible to check the newly-added dependencies
+won't break the policy, and add their LICENSE's and NOTICES's to the project.
+
+We have a [simple script](../../../tools/dependencies/check-LICENSE.sh) to help you make sure that you didn't
+miss any newly-added dependency:
+- Build a distribution package and unzip/untar it to folder `dist`.
+- Run the script in the root directory, it will print out all newly-added dependencies.
+- Check the LICENSE's and NOTICE's of those dependencies, if they can be included in an ASF project, add them in the `apm-dist/release-docs/{LICENSE,NOTICE}` file.
+- Add those dependencies' names to the `tools/dependencies/known-oap-backend-dependencies.txt` file (**alphabetical order**), the next run of `check-LICENSE.sh` should pass. 
+
+## Profile
+The performance profile is an enhancement feature in the APM system. We are using the thread dump to estimate the method execution time, rather than adding many local spans. In this way, the resource cost would be much less than using distributed tracing to locate slow method. This feature is suitable in the production environment. The following documents are important for developers to understand the key parts of this feature
+- [Profile data report procotol](https://github.com/apache/skywalking-data-collect-protocol/tree/master/profile) is provided like other trace, JVM data through gRPC.
+- [Thread dump merging mechanism](backend-profile.md) introduces the merging mechanism, which helps the end users to understand the profile report.
+- [Exporter tool of profile raw data](backend-profile-export.md) introduces when the visualization doesn't work well through the official UI, how to package the original profile data, which helps the users report the issue.
 
 ## For release
 [Apache Release Guide](How-to-release.md) introduces to the committer team about doing official Apache version release, to avoid 

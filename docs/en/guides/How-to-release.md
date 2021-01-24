@@ -65,10 +65,8 @@ but just failure. Run `gpg --sign xxx` to any file could remember the password f
 ```shell
 export RELEASE_VERSION=x.y.z (example: RELEASE_VERSION=5.0.0-alpha)
 cd tools/releasing
-sh create_source_release.sh
+bash create_source_release.sh
 ```
-
-**NOTICE**, `create_source_release.sh` is just suitable for MacOS. Welcome anyone to contribute Windows bat and Linux shell. 
 
 This scripts should do following things
 1. Use `v` + `RELEASE_VERSION` as tag to clone the codes.
@@ -110,13 +108,12 @@ Mail title: [ANNOUNCE] SkyWalking x.y.z test build available
 Mail content:
 The test build of x.y.z is available.
 
-This is our Apache release.
 We welcome any comments you may have, and will take all feedback into
 account if a quality vote is called for this build.
 
 Release notes:
 
- * https://github.com/apache/skywalking/blob/master/CHANGES.md
+ * https://github.com/apache/skywalking/blob/master/changes/changes-x.y.z.md
 
 Release Candidate:
 
@@ -144,7 +141,7 @@ Release CommitID :
 
 Keys to verify the Release Candidate :
 
- * http://pgp.mit.edu:11371/pks/lookup?op=get&search=0x2EF5026E70A55777 corresponding to pengys@apache.org
+ * https://dist.apache.org/repos/dist/release/skywalking/KEYS
 
 Guide to build the release from source :
 
@@ -170,7 +167,7 @@ This is a call for vote to release Apache SkyWalking version x.y.z.
 
 Release notes:
 
- * https://github.com/apache/skywalking/blob/x.y.z/CHANGES.md
+ * https://github.com/apache/skywalking/blob/master/changes/changes-x.y.z.md
 
 Release Candidate:
 
@@ -219,8 +216,9 @@ All PMC members and committers should check these before vote +1.
 are in `https://dist.apache.org/repos/dist/dev/skywalking/x.y.z` with .asc, .sha512
 1. `LICENSE` and `NOTICE` are in Source code and distribution package.
 1. Check `shasum -c apache-skywalking-apm-x.y.z-src.tgz.sha512`
+1. Check `gpg --verify apache-skywalking-apm-x.y.z-src.tgz.asc apache-skywalking-apm-x.y.z-src.tgz`
 1. Build distribution from source code package (apache-skywalking-x.y.z-src.tar.gz) by following this [doc](https://github.com/apache/skywalking/blob/master/docs/en/guides/How-to-build.md#build-from-apache-source-code-release).
-1. Apache RAT check. Run `./mvnw apache-rat:check`. (No binary in source codes)
+1. Check Apache License Header. Run `docker run --rm -v $(pwd):/github/workspace apache/skywalking-eyes header check`. (No binary in source codes)
 
 
 Vote result should follow these.
@@ -243,35 +241,46 @@ enter your apache password
 We only publish Apache mirror path as release info.
 4. Public asc and sha512 locate in `https://www.apache.org/dist/skywalking/x.y.z/xxx`
 5. Public KEYS pointing to  `https://www.apache.org/dist/skywalking/KEYS`
-6. Send ANNOUNCE mail to `dev@skywalking.apache.org`.
+6. Update website download page. http://skywalking.apache.org/downloads/ . Include new download source, distribution, sha512, asc and document
+links. Links could be found by following above rules(3)-(6).
+7. Add a release event on website homepage and event page. Announce the public release with changelog or key features.
+8. Send ANNOUNCE email to `dev@skywalking.apache.org`, `announce@apache.org`, the sender should use Apache email account.
 ```
-Mail title: [ANNOUNCE] Release Apache SkyWalking version x.y.z
+Mail title: [ANNOUNCE] Apache SkyWalking x.y.z released
 
 Mail content:
 Hi all,
 
-Apache SkyWalking  Team is glad to announce the first release of Apache SkyWalking x.y.z.
+Apache SkyWalking Team is glad to announce the first release of Apache SkyWalking x.y.z.
 
-SkyWalking: APM (application performance monitor) tool for distributed systems, 
-especially designed for microservices, cloud native and container-based (Docker, Kubernetes, Mesos) architectures. 
+SkyWalking: APM (application performance monitor) tool for distributed systems,
+especially designed for microservices, cloud native and container-based (Docker, Kubernetes, Mesos) architectures.
 
-Vote Thread: 
+This release contains a number of new features, bug fixes and improvements compared to
+version a.b.c(last release). The notable changes since x.y.z include:
 
-Download Links : http://skywalking.apache.org/downloads/
+(Highlight key changes)
+1. ...
+2. ...
+3. ...
 
-Release Notes : https://github.com/apache/skywalking/blob/x.y.z/CHANGES.md
+Please refer to the change log for the complete list of changes:
+https://github.com/apache/skywalking/blob/master/changes/changes-x.y.z.md
 
-Website: http://skywalking.apache.org/
+Apache SkyWalking website:
+http://skywalking.apache.org/
+
+Downloads:
+http://skywalking.apache.org/downloads/
+
+Twitter:
+https://twitter.com/ASFSkyWalking
 
 SkyWalking Resources:
+- GitHub: https://github.com/apache/skywalking
 - Issue: https://github.com/apache/skywalking/issues
 - Mailing list: dev@skywalkiing.apache.org
-- Documents: https://github.com/apache/skywalking/blob/x.y.z/docs/README.md
 
 
 - Apache SkyWalking Team
 ```
-
-7. Update website download page. http://skywalking.apache.org/downloads/ . Include new download source, distribution, sha512, asc and document
-links. Links could be found by following above rules(3)-(6).
-8. Add a release event on website homepage and even page. Announce the public release with changelog or key features.

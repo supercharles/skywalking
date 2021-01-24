@@ -20,7 +20,6 @@ package org.apache.skywalking.apm.plugin.okhttp.v3;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import okhttp3.Headers;
 import okhttp3.HttpUrl;
 import okhttp3.Request;
@@ -39,11 +38,9 @@ import org.apache.skywalking.apm.network.trace.component.ComponentsDefine;
 /**
  * {@link AsyncCallInterceptor} get the `EnhanceRequiredInfo` instance from `SkyWalkingDynamicField` and then put it
  * into `AsyncCall` instance when the `AsyncCall` constructor called.
- *
+ * <p>
  * {@link AsyncCallInterceptor} also create an exit span by using the `EnhanceRequiredInfo` when the `execute` method
  * called.
- *
- * @author zhangxin
  */
 public class AsyncCallInterceptor implements InstanceConstructorInterceptor, InstanceMethodsAroundInterceptor {
     @Override
@@ -52,7 +49,7 @@ public class AsyncCallInterceptor implements InstanceConstructorInterceptor, Ins
          * The first argument of constructor is not the `real` parameter when the enhance class is an inner class. This
          * is the JDK compiler mechanism.
          */
-        EnhancedInstance realCallInstance = (EnhancedInstance)allArguments[1];
+        EnhancedInstance realCallInstance = (EnhancedInstance) allArguments[1];
         Object enhanceRequireInfo = realCallInstance.getSkyWalkingDynamicField();
 
         objInst.setSkyWalkingDynamicField(enhanceRequireInfo);
@@ -61,12 +58,12 @@ public class AsyncCallInterceptor implements InstanceConstructorInterceptor, Ins
     @Override
     public void beforeMethod(EnhancedInstance objInst, Method method, Object[] allArguments, Class<?>[] argumentsTypes,
         MethodInterceptResult result) throws Throwable {
-        EnhanceRequiredInfo enhanceRequiredInfo = (EnhanceRequiredInfo)objInst.getSkyWalkingDynamicField();
-        Request request = (Request)enhanceRequiredInfo.getRealCallEnhance().getSkyWalkingDynamicField();
-
+        EnhanceRequiredInfo enhanceRequiredInfo = (EnhanceRequiredInfo) objInst.getSkyWalkingDynamicField();
+        Request request = (Request) enhanceRequiredInfo.getRealCallEnhance().getSkyWalkingDynamicField();
 
         HttpUrl requestUrl = request.url();
-        AbstractSpan span = ContextManager.createExitSpan(requestUrl.uri().getPath(), requestUrl.host() + ":" + requestUrl.port());
+        AbstractSpan span = ContextManager.createExitSpan(requestUrl.uri()
+                                                                    .getPath(), requestUrl.host() + ":" + requestUrl.port());
         ContextManager.continued(enhanceRequiredInfo.getContextSnapshot());
         ContextCarrier contextCarrier = new ContextCarrier();
         ContextManager.inject(contextCarrier);
@@ -76,19 +73,14 @@ public class AsyncCallInterceptor implements InstanceConstructorInterceptor, Ins
         SpanLayer.asHttp(span);
 
         Field headersField = Request.class.getDeclaredField("headers");
-        Field modifiersField = Field.class.getDeclaredField("modifiers");
-        modifiersField.setAccessible(true);
-        modifiersField.setInt(headersField, headersField.getModifiers() & ~Modifier.FINAL);
-
         headersField.setAccessible(true);
         Headers.Builder headerBuilder = request.headers().newBuilder();
         CarrierItem next = contextCarrier.items();
         while (next.hasNext()) {
             next = next.next();
-            headerBuilder.add(next.getHeadKey(), next.getHeadValue());
+            headerBuilder.set(next.getHeadKey(), next.getHeadValue());
         }
         headersField.set(request, headerBuilder.build());
-
 
     }
 
@@ -99,7 +91,8 @@ public class AsyncCallInterceptor implements InstanceConstructorInterceptor, Ins
         return ret;
     }
 
-    @Override public void handleMethodException(EnhancedInstance objInst, Method method, Object[] allArguments,
+    @Override
+    public void handleMethodException(EnhancedInstance objInst, Method method, Object[] allArguments,
         Class<?>[] argumentsTypes, Throwable t) {
         ContextManager.activeSpan().log(t);
     }

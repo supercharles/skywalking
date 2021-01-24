@@ -31,6 +31,7 @@ import org.apache.skywalking.oap.server.core.worker.WorkerInstancesService;
 import org.apache.skywalking.oap.server.library.module.ModuleDefineHolder;
 import org.apache.skywalking.oap.server.telemetry.TelemetryModule;
 import org.apache.skywalking.oap.server.telemetry.api.CounterMetrics;
+import org.apache.skywalking.oap.server.telemetry.api.HistogramMetrics;
 import org.apache.skywalking.oap.server.telemetry.api.MetricsCreator;
 import org.apache.skywalking.oap.server.testing.module.ModuleDefineTesting;
 import org.apache.skywalking.oap.server.testing.module.ModuleManagerTesting;
@@ -45,14 +46,12 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
-/**
- * @author peng-yongsheng
- */
 public class GRPCRemoteClientTestCase {
 
-    private final String nextWorkerId = "mock-worker";
+    private final String nextWorkerName = "mock-worker";
     private ModuleManagerTesting moduleManager;
-    @Rule public final GrpcServerRule grpcServerRule = new GrpcServerRule().directExecutor();
+    @Rule
+    public final GrpcServerRule grpcServerRule = new GrpcServerRule().directExecutor();
 
     @Before
     public void before() {
@@ -65,20 +64,36 @@ public class GRPCRemoteClientTestCase {
         moduleDefine.provider().registerServiceImplementation(IWorkerInstanceSetter.class, workerInstancesService);
 
         TestWorker worker = new TestWorker(moduleManager);
+        workerInstancesService.put(nextWorkerName, worker, TestStreamData.class);
     }
 
     @Test
     public void testPush() throws InterruptedException {
         MetricsCreator metricsCreator = mock(MetricsCreator.class);
         when(metricsCreator.createCounter(any(), any(), any(), any())).thenReturn(new CounterMetrics() {
-            @Override public void inc() {
+            @Override
+            public void inc() {
 
             }
 
-            @Override public void inc(double value) {
+            @Override
+            public void inc(double value) {
 
             }
         });
+
+        when(metricsCreator.createHistogramMetric(any(), any(), any(), any())).thenReturn(new HistogramMetrics() {
+            @Override
+            public Timer createTimer() {
+                return super.createTimer();
+            }
+
+            @Override
+            public void observe(double value) {
+
+            }
+        });
+
         ModuleDefineTesting telemetryModuleDefine = new ModuleDefineTesting();
         moduleManager.put(TelemetryModule.NAME, telemetryModuleDefine);
         telemetryModuleDefine.provider().registerServiceImplementation(MetricsCreator.class, metricsCreator);
@@ -86,13 +101,13 @@ public class GRPCRemoteClientTestCase {
         grpcServerRule.getServiceRegistry().addService(new RemoteServiceHandler(moduleManager));
 
         Address address = new Address("not-important", 11, false);
-        GRPCRemoteClient remoteClient = spy(new GRPCRemoteClient(moduleManager, address, 1, 10));
+        GRPCRemoteClient remoteClient = spy(new GRPCRemoteClient(moduleManager, address, 1, 10, 10, null));
         remoteClient.connect();
 
         doReturn(grpcServerRule.getChannel()).when(remoteClient).getChannel();
 
         for (int i = 0; i < 12; i++) {
-            remoteClient.push(nextWorkerId, new TestStreamData());
+            remoteClient.push(nextWorkerName, new TestStreamData());
         }
 
         TimeUnit.SECONDS.sleep(2);
@@ -102,15 +117,18 @@ public class GRPCRemoteClientTestCase {
 
         private long value;
 
-        @Override public int remoteHashCode() {
+        @Override
+        public int remoteHashCode() {
             return 0;
         }
 
-        @Override public void deserialize(RemoteData remoteData) {
+        @Override
+        public void deserialize(RemoteData remoteData) {
             this.value = remoteData.getDataLongs(0);
         }
 
-        @Override public RemoteData.Builder serialize() {
+        @Override
+        public RemoteData.Builder serialize() {
             RemoteData.Builder builder = RemoteData.newBuilder();
             builder.addDataLongs(987);
             return builder;
@@ -123,8 +141,9 @@ public class GRPCRemoteClientTestCase {
             super(moduleDefineHolder);
         }
 
-        @Override public void in(Object o) {
-            TestStreamData streamData = (TestStreamData)o;
+        @Override
+        public void in(Object o) {
+            TestStreamData streamData = (TestStreamData) o;
             Assert.assertEquals(987, streamData.value);
         }
     }

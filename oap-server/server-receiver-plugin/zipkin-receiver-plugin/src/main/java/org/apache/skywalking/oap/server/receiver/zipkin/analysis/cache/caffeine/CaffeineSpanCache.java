@@ -36,23 +36,21 @@ import org.slf4j.LoggerFactory;
 import zipkin2.Span;
 
 /**
- * NOTICE: FROM my test, Caffeine cache triggers/checks expire only face write/read op.
- * In order to make trace finish in time, I have to set a timer to write a meaningless trace, for active expire.
- *
- * @author wusheng
+ * NOTICE: FROM my test, Caffeine cache triggers/checks expire only face write/read op. In order to make trace finish in
+ * time, I have to set a timer to write a meaningless trace, for active expire.
  */
 public class CaffeineSpanCache implements ISpanCache, RemovalListener<String, ZipkinTrace> {
-    private static final Logger logger = LoggerFactory.getLogger(CaffeineSpanCache.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(CaffeineSpanCache.class);
     private Cache<String, ZipkinTrace> inProcessSpanCache;
     private ReentrantLock newTraceLock;
 
     public CaffeineSpanCache(ZipkinReceiverConfig config) {
         newTraceLock = new ReentrantLock();
         inProcessSpanCache = Caffeine.newBuilder()
-                .expireAfterWrite(config.getExpireTime(), TimeUnit.SECONDS)
-                .maximumSize(config.getMaxCacheSize())
-                .removalListener(this)
-                .build();
+                                     .expireAfterWrite(config.getExpireTime(), TimeUnit.SECONDS)
+                                     .maximumSize(config.getMaxCacheSize())
+                                     .removalListener(this)
+                                     .build();
         Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(() -> {
             inProcessSpanCache.put("ACTIVE", new ZipkinTrace.TriggerTrace());
         }, 2, 3, TimeUnit.SECONDS);
@@ -60,10 +58,6 @@ public class CaffeineSpanCache implements ISpanCache, RemovalListener<String, Zi
 
     /**
      * Zipkin trace finished by the expired rule.
-     *
-     * @param key
-     * @param trace
-     * @param cause
      */
     @Override
     public void onRemoval(@Nullable String key, @Nullable ZipkinTrace trace, @Nonnull RemovalCause cause) {
@@ -73,8 +67,8 @@ public class CaffeineSpanCache implements ISpanCache, RemovalListener<String, Zi
         try {
             Zipkin2SkyWalkingTransfer.INSTANCE.transfer(trace);
         } catch (Exception e) {
-            logger.error(e.getMessage(), e);
-            logger.warn("Zipkin trace:" + trace);
+            LOGGER.error(e.getMessage(), e);
+            LOGGER.warn("Zipkin trace:" + trace);
         }
     }
 

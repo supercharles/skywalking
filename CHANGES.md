@@ -2,257 +2,119 @@ Changes by Version
 ==================
 Release Notes.
 
-6.2.0
+8.4.0
 ------------------
-
 #### Project
-* ElasticSearch implementation performance improved, and CHANGED totally. Must delete all existing indexes to do upgrade.
-* CI and Integration tests provided by ASF INFRA.
-* Plan to enhance tests including e2e, plugin tests in all pull requests, powered by ASF INFRA.
-* DataCarrier queue write index controller performance improvement. 3-5 times quicker than before.
-* Add windows compile support in CI.
+* Incompatible with previous releases when use H2/MySQL/TiDB storage options, due to support multiple alarm rules triggered for one entity.
+* Chore: adapt `create_source_release.sh` to make it runnable on Linux.
+* Add `package` to `.proto` files, prevent polluting top-level namespace in some languages; The OAP server supports previous agent releases, whereas the previous OAP server (<=8.3.0) won't recognize newer agents since this version (>= 8.4.0).
+* Add ElasticSearch 7.10 to test matrix and verify it works.
+* Replace Apache RAT with skywalking-eyes to check license headers.
+* Set up test of Envoy ALS / MetricsService under Istio 1.8.2 to verify Envoy V3 protocol
 
 #### Java Agent
-* Support collect SQL parameter in MySQL plugin.[Optional]
-* Support SolrJ plugin.
-* Support RESTEasy plugin.
-* Support Spring Gateway plugin for 2.1.x
-* TracingContext performance improvement.
-* Support Apache ShardingSphere(incubating) plugin.
-* Support `span#error` in application toolkit.
-* Fix OOM by empty stack of exception.
-* FIx wrong cause exception of stack in span log.
-* Fix unclear the running context in SpringMVC plugin.
-* Fix CPU usage accessor calculation issue.
-* Fix SpringMVC plugin span not stop bug when doing HTTP forward.
-* Fix lettuce plugin async commend bug and NPE.
-* Fix webflux plugin cast exception.
-* [CI]Support `import` check.
+* The operation name of quartz-scheduler plugin, has been changed as the `quartz-scheduler/${className}` format.
+* Fix jdk-http and okhttp-3.x plugin did not overwrite the old trace header.
+* Add interceptors of method(analyze, searchScroll, clearScroll, searchTemplate and deleteByQuery) for elasticsearch-6.x-plugin.
+* Support collecting logs of log4j, log4j2, and logback in the tracing context with a new `logger-plugin`.
+* Fix the unexpected RunningContext recreation in the Tomcat plugin.
+* Fix the potential NPE when trace_sql_parameters is enabled.
+* Update `byte-buddy` to 1.10.19.
+* Fix thrift plugin trace link broken when intermediate service does not mount agent
+* Fix thrift plugin collects wrong args when the method without parameter.
+* Fix DataCarrier's `org.apache.skywalking.apm.commons.datacarrier.buffer.Buffer` implementation isn't activated in `IF_POSSIBLE` mode.
+* Fix ArrayBlockingQueueBuffer's useless `IF_POSSIBLE` mode list
+* Support building gRPC TLS channel but CA file is not required.
+* Add witness method mechanism in the agent plugin core.
+* Add Dolphinscheduler plugin definition.
+* Make sampling still works when the trace ignores plug-in activation.
+* Fix mssql-plugin occur ClassCastException when call the method of return generate key.
+* The operation name of dubbo and dubbo-2.7.x-plugin, has been changed as the `groupValue/className.methodName` format
+* Fix bug that rocketmq-plugin set the wrong tag.
+* Fix duplicated `EnhancedInstance` interface added.
+* Fix thread leaks caused by the elasticsearch-6.x-plugin plugin.
+* Support reading segmentId and spanId with toolkit.
+* Fix RestTemplate plugin recording url tag with wrong port
+* Support collecting logs and forwarding through gRPC.
+* Support config `agent.sample_n_per_3_secs` can be changed in the runtime.
+* Support DNS periodic resolving mechanism to update backend service.
 
-#### Backend
-* Support time serious ElasticSearch storage.
-* Provide dynamic configuration module and implementation. Slow SQL threshold supports dynamic config today.
-* Dynamic Configuration module provide multiple implementations, DCS(gRPC based), Zookeeper, Apollo, Nacos.
-* Provide P99/95/90/75/50 charts in topology edge.
-* New topology query protocol and implementation.
-* Support Envoy ALS in Service Mesh scenario.
-* Support Nacos cluster management.
-* Enhance metric exporter. Run in increment and total modes.
-* Fix module provider is loaded repeatedly.
-* Change TOP slow SQL storage in ES to Text from Keyword, as too long text issue.
-* Fix H2TopologyQuery tiny bug.
-* Fix H2 log query bug.(No feature provided yet)
-* Filtering pods not in 'Running' phase in mesh scenario.
-* Fix query alarm bug in MySQL and H2 storage.
-* Codes refactor.
-
-#### UI
-* Fix some `ID is null` query(s).
-* Page refactor, especially time-picker, more friendly.
-* Login removed.
-* Trace timestamp visualization issue fixed.
-* Provide P99/95/90/75/50 charts in topology edge.
-* Change all P99/95/90/75/50 charts style. More readable.
-* Fix 404 in trace page.
-
-#### Document
-* Go2Sky project has been donated to SkyAPM, change document link.
-* Add FAQ for ElasticSearch storage, and links from document.
-* Add FAQ fro WebSphere installation.
-* Add several open users.
-* Add alarm webhook document.
-
-
-All issues and pull requests are [here](https://github.com/apache/skywalking/milestone/33?closed=1)
-
-6.1.0
-------------------
-
-#### Project
-**SkyWalking graduated as Apache Top Level Project**.
-- Support compiling project agent, backend, UI separately.
-
-#### Java Agent
-- Support Vert.x Core 3.x plugin.
-- Support Apache Dubbo plugin.
-- Support `use_qualified_name_as_endpoint_name` and `use_qualified_name_as_operation_name` configs in SpringMVC plugin.
-- Support span async close APIs in core. Used in Vert.x plugin.
-- Support MySQL 5,8 plugins.
-- Support set instance id manually(optional).
-- Support customize enhance trace plugin in optional list.
-- Support to set peer in Entry Span.
-- Support Zookeeper plugin.
-- Fix Webflux plugin created unexpected Entry Span. 
-- Fix Kafka plugin NPE in Kafka 1.1+
-- Fix wrong operation name in postgre 8.x plugin.
-- Fix RabbitMQ plugin NPE.
-- Fix agent can't run in JVM 6/7, remove `module-info.class`.
-- Fix agent can't work well, if there is whitespace in agent path.
-- Fix Spring annotation bug and inheritance enhance issue.
-- Fix CPU accessor bug.
-
-#### Backend
-**Performance improved, especially in CPU limited environment. 3x improvement in service mesh scenario(no trace) in 8C16G VM. 
-Significantly cost less CPU in low payload.**
-
-- Support database metrics and SLOW SQL detection.
-- Support to set max size of metadata query. And change default to 5000 from 100.
-- Support ElasticSearch template for new feature in the future.
-- Support shutdown Zipkin trace analysis, because it doesn't fit production environment.
-- Support log type, scope HTTP_ACCESS_LOG and query. No feature provided, prepare for future  versions.
-- Support .NET clr receiver.
-- Support Jaeger trace format, no analysis.
-- Support group endpoint name by regax rules in mesh receiver.
-- Support `disable` statement in OAL.
-- Support basic auth in ElasticSearch connection.
-- Support metrics exporter module and gRPC implementor.
-- Support `>, <, >=, <=` in OAL.
-- Support role mode in backend.
-- Support Envoy metrics.
-- Support query segment by service instance.
-- Support to set host/port manually at cluster coordinator, rather than based on core settings.
-- Make sure OAP shutdown when it faces startup error.
-- Support set separated gRPC/Jetty ip:port for receiver, default still use core settings.
-- Fix JVM receiver bug.
-- Fix wrong dest service in mesh analysis.
-- Fix search doesn't work as expected.
-- Refactor `ScopeDeclaration` annotation.
-- Refactor register lock mechanism.
-- Add SmartSql component for .NET
-- Add integration tests for ElasticSearch client.
-- Add test cases for exporter.
-- Add test cases for queue consume.
+#### OAP-Backend
+* Make meter receiver support MAL.
+* Support influxDB connection response format option. Fix some error when use JSON as influxDB response format.
+* Support Kafka MirrorMaker 2.0 to replicate topics between Kafka clusters.
+* Add the rule name field to alarm record storage entity as a part of ID, to support multiple alarm rules triggered for one entity. The scope id has been removed from the ID.
+* Fix MAL concurrent execution issues.
+* Fix group name can't be queried in the GraphQL.
+* Fix potential gRPC connection leak(not closed) for the channels among OAP instances.
+* Filter OAP instances(unassigned in booting stage) of the empty IP in KubernetesCoordinator.
+* Add component ID for Python aiohttp plugin requester and server.
+* Fix H2 in-memory database table missing issues
+* Add component ID for Python pyramid plugin server.
+* Add component ID for NodeJS Axios plugin.
+* Fix searchService method error in storage-influxdb-plugin.
+* Add JavaScript component ID.
+* Fix CVE of UninstrumentedGateways in Dynamic Configuration activation.
+* Improve query performance in storage-influxdb-plugin.
+* Fix the uuid field in GRPCConfigWatcherRegister is not updated.
+* Support Envoy {AccessLog,Metrics}Service API V3.
+* Adopt the [MAL](docs/en/concepts-and-designs/mal.md) in Envoy metrics service analyzer.
+* Fix the priority setting doesn't work of the ALS analyzers.
+* Fix bug that `endpoint-name-grouping.yml` is not customizable in Dockerized case.
+* Fix bug that istio version metric type on UI template mismatches the otel rule.
+* Improve ReadWriteSafeCache concurrency read-write performance
+* Fix bug that if use JSON as InfluxDB.ResponseFormat then NumberFormatException maybe occur.
+* Fix `timeBucket` not taking effect in EqualsAndHashCode annotation of some relationship metrics.
+* Fix `SharingServerConfig`'s propertie is not correct in the `application.yml`, contextPath -> restConnextPath.
+* Istio control plane: remove redundant metrics and polish panel layout.
+* Fix bug endpoint name grouping not work due to setting service name and endpoint name out of order.
+* Fix receiver analysis error count metrics
+* Log collecting and query implementation
+* Support Alarm to feishu
+* Add the implementation of ConfigurationDiscovery on the OAP side.
+* Fix bug in `parseInternalErrorCode` where some error codes are never reached.
+* OAL supports multiple values when as numeric
+* Add node information from the Openensus proto to the labels of the samples, to support the identification of the source of the Metric data.
 
 #### UI
-- RocketBot UI has been accepted and bind in this release.
-- Support CLR metrics.
+* Fix un-removed tags in trace query.
+* Fix unexpected metrics name on single value component.
+* Don't allow negative value as the refresh period.
+* Fix style issue in trace table view.
+* Separation Log and Dashboard selector data to avoid conflicts.
+* Fix trace instance selector bug.
+* Fix Unnecessary sidebar in tooltips for charts.
+* Refactor dashboard query in a common script.
+* Implement refreshing data for topology by updating date.
+* Implement group selector in the topology.
+* Fix all as default parameter for services selector.
+* Add icon for Python aiohttp plugin.
+* Add icon for Python pyramid plugin.
+* Fix topology render all services nodes when groups changed.
+* Fix rk-footer utc input's width.
+* Update rk-icon and rewrite rk-header svg tags with rk-icon.
+* Add icon for http type.
+* Fix rk-footer utc without local storage.
+* Sort group names in the topology.
+* Add logo for Dolphinscheduler.
+* Fix dashboard wrong instance.
+* Add a legend for the topology.
+* Update the condition of unhealthy cube.
+* Fix: use icons to replace buttons for task list in profile.
+* Fix: support `=` in the tag value in the trace query page.
+* Add envoy proxy component logo.
+* Chore: set up license-eye to check license headers and add missing license headers.
+* Fix prop for instances-survey and endpoints-survey.
 
-#### Document
-- Documents updated, matching Top Level Project requirement.
-- UI licenses updated, according to RocketBot UI IP clearance.
-- User wall and powered-by list updated.
-- CN documents removed, only consider to provide by volunteer out of Apache.
+#### Documentation
+* Update the documents of backend fetcher and self observability about the latest configurations.
+* Add documents about the group name of service.
+* Update docs about the latest UI.
+* Update the document of backend trace sampling with the latest configuration.
+* Update kafka plugin support version to 2.6.1.
+* Add FAQ about `Fix compiling on Mac M1 chip`.
 
+All issues and pull requests are [here](https://github.com/apache/skywalking/milestone/68?closed=1)
 
-All issues and pull requests are [here](https://github.com/apache/skywalking/milestone/32?closed=1)
-
-
-6.0.0-GA
 ------------------
-
-#### Java Agent
-- Support gson plugin(optional).
-- Support canal plugin.
-- Fix missing ojdbc component id.
-- Fix dubbo plugin conflict.
-- Fix OpenTracing tag match bug.
-- Fix a missing check in ignore plugin.
-
-#### Backend
-- Adjust service inventory entity, to add properties.
-- Adjust service instance inventory entity, to add properties.
-- Add nodeType to service inventory entity.
-- Fix when operation name of local and exit spans in ref, the segment lost.
-- Fix the index names don't show right in logs. 
-- Fix wrong alarm text.
-- Add test case for span limit mechanism.
-- Add telemetry module and prometheus implementation, with grafana setting.
-- A refactor for register API in storage module.
-- Fix H2 and MySQL endpoint dependency map miss upstream side.
-- Optimize the inventory register and refactor the implementation.
-- Speed up the trace buffer read.
-- Fix and removed unnecessary inventory register operations.
-
-#### UI
-- Add new trace view.
-- Add word-break to tag value. 
-
-#### Document
-- Add two startup modes document.
-- Add PHP agent links.
-- Add some cn documents.
-- Update year to 2019
-- User wall updated.
-- Fix a wrong description in `how-to-build` doc.
-
-All issues and pull requests are [here](https://github.com/apache/skywalking/milestone/30?closed=1)
-
-6.0.0-beta
-------------------
-
-#### Protocol
-- Provide Trace Data Protocol v2
-- Provide SkyWalking Cross Process Propagation Headers Protocol v2.
-
-#### Java Agent
-- Support Trace Data Protocol v2
-- Support SkyWalking Cross Process Propagation Headers Protocol v2.
-- Support SkyWalking Cross Process Propagation Headers Protocol v1 running in compatible way. Need declare open explicitly.
-- Support SpringMVC 5
-- Support webflux
-- Support a new way to override agent.config by system env. 
-- Span tag can override by explicit way.
-- Fix Spring Controller Inherit issue.
-- Fix ElasticSearch plugin NPE.
-- Fix agent classloader dead lock in certain situation.
-- Fix agent log typo.
-- Fix wrong component id in resettemplete plugin.
-- Fix use transform `ignore()` in wrong way.
-- Fix H2 query bug.
-
-#### Backend
-- Support Trace Data Protocol v2. And Trace Data Protocol v1 is still supported.
-- Support MySQL as storage.
-- Support TiDB as storage.
-- Support a new way to override application.yml by system env.
-- Support service instance and endpoint alarm.
-- Support namespace in istio receiver.
-- Support service throughput(cpm), successful rate(sla), avg response time and p99/p95/p90/p75/p50 response time.
-- Support backend trace sampling.
-- Support Zipkin format again.
-- Support init mode.
-- Support namespace in Zookeeper cluster management.
-- Support consul plugin in cluster module.
-- OAL generate tool has been integrated into main repo, in the maven `compile` stage.
-- Optimize trace paging query.
-- Fix trace query don't use fuzzy query in ElasticSearch storage.
-- Fix alarm can't be active in right way.
-- Fix unnecessary condition in database and cache number query.
-- Fix wrong namespace bug in ElasticSearch storage.
-- Fix `Remote clients selector error: / by zero `.
-- Fix segment TTL is not working.
-
-#### UI
-- Support service throughput(cpm), successful rate(sla), avg response time and p99/p95/p90/p75/p50 response time.
-- Fix TopN endpoint link doesn't work right.
-- Fix trace stack style.
-- Fix CI.
-
-#### Document
-- Add more agent setting documents.
-- Add more contribution documents.
-- Update user wall and powered-by page.
-- Add RocketBot UI project link in document.
-
-All issues and pull requests are [here](https://github.com/apache/skywalking/milestone/31?closed=1)
-
-6.0.0-alpha
-------------------
-
-SkyWalking 6 is totally new milestone for the project. At this point, we are not just a distributing
-tracing system with analysis and visualization capabilities. We are an **Observability Analysis Platform(OAL)**.
-
-The core and most important features in v6 are
-1. Support to collect telemetry data from different sources, such as multiple language agents and service mesh.
-1. Extensible stream analysis core. Make SQL and cache analysis available in core level, although haven't
-provided in this release.
-1. Provide **Observability Analysis Language(OAL)** to make analysis metrics customization available.
-1. New GraphQL query protocol. Not binding with UI now.
-1. UI topology is better now.
-1. New alarm core provided. In alpha, only on service related metrics.
-
-All issues and pull requests are [here](https://github.com/apache/skywalking/milestone/29?closed=1)
-
-5.x releases
-------------------
-You could find all CHANGES of 5.x at [here](https://github.com/apache/skywalking/blob/5.x/CHANGES.md)
+Find change logs of all versions [here](changes).

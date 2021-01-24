@@ -18,20 +18,22 @@
 
 package org.apache.skywalking.oap.server.receiver.zipkin;
 
-import lombok.*;
+import lombok.Getter;
+import lombok.Setter;
 import org.apache.skywalking.oap.server.library.module.ModuleConfig;
 
-/**
- * @author wusheng
- */
 @Setter
 @Getter
 public class ZipkinReceiverConfig extends ModuleConfig {
     private String host;
     private int port;
     private String contextPath;
+    private int jettyMinThreads = 1;
+    private int jettyMaxThreads = 200;
+    private long jettyIdleTimeOut = 30000;
+    private int jettyAcceptorPriorityDelta = 0;
+    private int jettyAcceptQueueSize = 0;
     private int expireTime = 20;
     private int maxCacheSize = 1_000_000;
     private boolean needAnalysis = false;
-    private boolean registerZipkinEndpoint = true;
 }

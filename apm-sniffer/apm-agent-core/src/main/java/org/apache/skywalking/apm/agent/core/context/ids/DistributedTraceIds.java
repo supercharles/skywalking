@@ -16,21 +16,17 @@
  *
  */
 
-
 package org.apache.skywalking.apm.agent.core.context.ids;
 
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
-/**
- * @author wusheng
- */
 public class DistributedTraceIds {
     private LinkedList<DistributedTraceId> relatedGlobalTraces;
 
     public DistributedTraceIds() {
-        relatedGlobalTraces = new LinkedList<DistributedTraceId>();
+        relatedGlobalTraces = new LinkedList<>();
     }
 
     public List<DistributedTraceId> getRelatedGlobalTraces() {

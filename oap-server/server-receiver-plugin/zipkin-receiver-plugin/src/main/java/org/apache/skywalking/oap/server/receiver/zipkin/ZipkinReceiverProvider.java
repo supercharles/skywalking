@@ -18,6 +18,7 @@
 
 package org.apache.skywalking.oap.server.receiver.zipkin;
 
+import org.apache.skywalking.oap.server.analyzer.provider.trace.parser.ISegmentParserService;
 import org.apache.skywalking.oap.server.core.CoreModule;
 import org.apache.skywalking.oap.server.library.module.ModuleConfig;
 import org.apache.skywalking.oap.server.library.module.ModuleDefine;
@@ -26,17 +27,13 @@ import org.apache.skywalking.oap.server.library.module.ModuleStartException;
 import org.apache.skywalking.oap.server.library.module.ServiceNotProvidedException;
 import org.apache.skywalking.oap.server.library.server.ServerException;
 import org.apache.skywalking.oap.server.library.server.jetty.JettyServer;
-import org.apache.skywalking.oap.server.receiver.sharing.server.CoreRegisterLinker;
+import org.apache.skywalking.oap.server.library.server.jetty.JettyServerConfig;
 import org.apache.skywalking.oap.server.receiver.trace.module.TraceModule;
-import org.apache.skywalking.oap.server.receiver.trace.provider.parser.ISegmentParserService;
-import org.apache.skywalking.oap.server.receiver.zipkin.analysis.*;
+import org.apache.skywalking.oap.server.receiver.zipkin.analysis.Receiver2AnalysisBridge;
+import org.apache.skywalking.oap.server.receiver.zipkin.analysis.transform.Zipkin2SkyWalkingTransfer;
 import org.apache.skywalking.oap.server.receiver.zipkin.handler.SpanV1JettyHandler;
 import org.apache.skywalking.oap.server.receiver.zipkin.handler.SpanV2JettyHandler;
-import org.apache.skywalking.oap.server.receiver.zipkin.analysis.transform.Zipkin2SkyWalkingTransfer;
 
-/**
- * @author wusheng
- */
 public class ZipkinReceiverProvider extends ModuleProvider {
     public static final String NAME = "default";
     private ZipkinReceiverConfig config;
@@ -46,39 +43,57 @@ public class ZipkinReceiverProvider extends ModuleProvider {
         config = new ZipkinReceiverConfig();
     }
 
-    @Override public String name() {
+    @Override
+    public String name() {
         return NAME;
     }
 
-    @Override public Class<? extends ModuleDefine> module() {
+    @Override
+    public Class<? extends ModuleDefine> module() {
         return ZipkinReceiverModule.class;
     }
 
-    @Override public ModuleConfig createConfigBeanIfAbsent() {
+    @Override
+    public ModuleConfig createConfigBeanIfAbsent() {
         return config;
     }
 
-    @Override public void prepare() throws ServiceNotProvidedException {
+    @Override
+    public void prepare() throws ServiceNotProvidedException {
 
     }
 
-    @Override public void start() throws ServiceNotProvidedException, ModuleStartException {
-        CoreRegisterLinker.setModuleManager(getManager());
+    @Override
+    public void start() throws ServiceNotProvidedException, ModuleStartException {
+        JettyServerConfig jettyServerConfig = JettyServerConfig.builder()
+                                                               .host(config.getHost())
+                                                               .port(config.getPort())
+                                                               .contextPath(config.getContextPath())
+                                                               .jettyIdleTimeOut(config.getJettyIdleTimeOut())
+                                                               .jettyAcceptorPriorityDelta(
+                                                                   config.getJettyAcceptorPriorityDelta())
+                                                               .jettyMinThreads(config.getJettyMinThreads())
+                                                               .jettyMaxThreads(config.getJettyMaxThreads())
+                                                               .jettyAcceptQueueSize(config.getJettyAcceptQueueSize())
+                                                               .build();
 
-        jettyServer = new JettyServer(config.getHost(), config.getPort(), config.getContextPath());
+        jettyServer = new JettyServer(jettyServerConfig);
         jettyServer.initialize();
 
         jettyServer.addHandler(new SpanV1JettyHandler(config, getManager()));
         jettyServer.addHandler(new SpanV2JettyHandler(config, getManager()));
 
         if (config.isNeedAnalysis()) {
-            ISegmentParserService segmentParseService = getManager().find(TraceModule.NAME).provider().getService(ISegmentParserService.class);
+            ISegmentParserService segmentParseService = getManager().find(TraceModule.NAME)
+                                                                    .provider()
+                                                                    .getService(ISegmentParserService.class);
             Receiver2AnalysisBridge bridge = new Receiver2AnalysisBridge(segmentParseService);
             Zipkin2SkyWalkingTransfer.INSTANCE.addListener(bridge);
         }
     }
 
-    @Override public void notifyAfterCompleted() throws ModuleStartException {
+    @Override
+    public void notifyAfterCompleted() throws ModuleStartException {
         try {
             jettyServer.start();
         } catch (ServerException e) {
@@ -86,7 +101,8 @@ public class ZipkinReceiverProvider extends ModuleProvider {
         }
     }
 
-    @Override public String[] requiredModules() {
+    @Override
+    public String[] requiredModules() {
         if (config.isNeedAnalysis()) {
             return new String[] {TraceModule.NAME};
         } else {

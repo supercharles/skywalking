@@ -21,7 +21,7 @@
     <parent>
         <artifactId>oap-server</artifactId>
         <groupId>org.apache.skywalking</groupId>
-        <version>6.3.0-SNAPSHOT</version>
+        <version>8.4.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -31,14 +31,19 @@
         <module>skywalking-trace-receiver-plugin</module>
         <module>zipkin-receiver-plugin</module>
         <module>skywalking-mesh-receiver-plugin</module>
-        <module>skywalking-istio-telemetry-receiver-plugin</module>
-        <module>skywalking-register-receiver-plugin</module>
+        <module>skywalking-management-receiver-plugin</module>
         <module>skywalking-jvm-receiver-plugin</module>
         <module>envoy-metrics-receiver-plugin</module>
         <module>skywalking-sharing-server-plugin</module>
         <module>skywalking-clr-receiver-plugin</module>
         <module>jaeger-receiver-plugin</module>
         <module>receiver-proto</module>
+        <module>skywalking-profile-receiver-plugin</module>
+        <module>otel-receiver-plugin</module>
+        <module>skywalking-meter-receiver-plugin</module>
+        <module>skywalking-browser-receiver-plugin</module>
+        <module>skywalking-log-recevier-plugin</module>
+        <module>configuration-discovery-receiver-plugin</module>
     </modules>
 
     <dependencies>
@@ -60,11 +65,6 @@
         <dependency>
             <groupId>org.apache.skywalking</groupId>
             <artifactId>library-util</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.skywalking</groupId>
-            <artifactId>library-buffer</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>

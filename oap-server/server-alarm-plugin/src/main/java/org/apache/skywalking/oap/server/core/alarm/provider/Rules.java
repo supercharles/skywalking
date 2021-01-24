@@ -18,17 +18,33 @@
 
 package org.apache.skywalking.oap.server.core.alarm.provider;
 
-import java.util.*;
-import lombok.*;
+import java.util.ArrayList;
+import java.util.List;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+import org.apache.skywalking.oap.server.core.alarm.provider.dingtalk.DingtalkSettings;
+import org.apache.skywalking.oap.server.core.alarm.provider.feishu.FeishuSettings;
+import org.apache.skywalking.oap.server.core.alarm.provider.grpc.GRPCAlarmSetting;
+import org.apache.skywalking.oap.server.core.alarm.provider.slack.SlackSettings;
+import org.apache.skywalking.oap.server.core.alarm.provider.wechat.WechatSettings;
 
-@Setter(AccessLevel.PUBLIC)
-@Getter(AccessLevel.PUBLIC)
+@Setter
+@Getter
+@ToString
 public class Rules {
     private List<AlarmRule> rules;
     private List<String> webhooks;
+    private GRPCAlarmSetting grpchookSetting;
+    private SlackSettings slacks;
+    private WechatSettings wecchats;
+    private List<CompositeAlarmRule> compositeRules;
+    private DingtalkSettings dingtalks;
+    private FeishuSettings feishus;
 
     public Rules() {
         this.rules = new ArrayList<>();
         this.webhooks = new ArrayList<>();
+        this.compositeRules = new ArrayList<>();
     }
 }

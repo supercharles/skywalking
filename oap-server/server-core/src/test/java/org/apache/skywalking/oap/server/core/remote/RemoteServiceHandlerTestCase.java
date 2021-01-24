@@ -30,6 +30,9 @@ import org.apache.skywalking.oap.server.core.remote.grpc.proto.RemoteData;
 import org.apache.skywalking.oap.server.core.remote.grpc.proto.RemoteMessage;
 import org.apache.skywalking.oap.server.core.remote.grpc.proto.RemoteServiceGrpc;
 import org.apache.skywalking.oap.server.core.worker.AbstractWorker;
+import org.apache.skywalking.oap.server.core.worker.IWorkerInstanceGetter;
+import org.apache.skywalking.oap.server.core.worker.IWorkerInstanceSetter;
+import org.apache.skywalking.oap.server.core.worker.WorkerInstancesService;
 import org.apache.skywalking.oap.server.library.module.DuplicateProviderException;
 import org.apache.skywalking.oap.server.library.module.ModuleDefineHolder;
 import org.apache.skywalking.oap.server.library.module.ProviderNotFoundException;
@@ -47,9 +50,6 @@ import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-/**
- * @author peng-yongsheng
- */
 public class RemoteServiceHandlerTestCase {
 
     @Rule
@@ -57,51 +57,72 @@ public class RemoteServiceHandlerTestCase {
 
     @Test
     public void callTest() throws DuplicateProviderException, ProviderNotFoundException, IOException {
-        final int streamDataClassId = 1;
         final String testWorkerId = "mock-worker";
 
         ModuleManagerTesting moduleManager = new ModuleManagerTesting();
         ModuleDefineTesting moduleDefine = new ModuleDefineTesting();
         moduleManager.put(CoreModule.NAME, moduleDefine);
 
+        WorkerInstancesService workerInstancesService = new WorkerInstancesService();
+        moduleDefine.provider().registerServiceImplementation(IWorkerInstanceGetter.class, workerInstancesService);
+        moduleDefine.provider().registerServiceImplementation(IWorkerInstanceSetter.class, workerInstancesService);
+
+        TestWorker worker = new TestWorker(moduleManager);
+        workerInstancesService.put(testWorkerId, worker, TestRemoteData.class);
+
         String serverName = InProcessServerBuilder.generateName();
         MetricsCreator metricsCreator = mock(MetricsCreator.class);
         when(metricsCreator.createCounter(any(), any(), any(), any())).thenReturn(new CounterMetrics() {
-            @Override public void inc() {
+            @Override
+            public void inc() {
 
             }
 
-            @Override public void inc(double value) {
+            @Override
+            public void inc(double value) {
 
             }
         });
-        when(metricsCreator.createHistogramMetric(any(), any(), any(), any(), any())).thenReturn(
-            new HistogramMetrics() {
-                @Override public void observe(double value) {
-
-                }
+        when(metricsCreator.createHistogramMetric(any(), any(), any(), any())).thenReturn(new HistogramMetrics() {
+            @Override
+            public Timer createTimer() {
+                return super.createTimer();
             }
-        );
+
+            @Override
+            public void observe(double value) {
+
+            }
+        });
+
         ModuleDefineTesting telemetryModuleDefine = new ModuleDefineTesting();
         moduleManager.put(TelemetryModule.NAME, telemetryModuleDefine);
         telemetryModuleDefine.provider().registerServiceImplementation(MetricsCreator.class, metricsCreator);
 
-        gRPCCleanup.register(InProcessServerBuilder
-            .forName(serverName).directExecutor().addService(new RemoteServiceHandler(moduleManager)).build().start());
+        gRPCCleanup.register(InProcessServerBuilder.forName(serverName)
+                                                   .directExecutor()
+                                                   .addService(new RemoteServiceHandler(moduleManager))
+                                                   .build()
+                                                   .start());
 
-        RemoteServiceGrpc.RemoteServiceStub remoteServiceStub = RemoteServiceGrpc.newStub(
-            gRPCCleanup.register(InProcessChannelBuilder.forName(serverName).directExecutor().build()));
+        RemoteServiceGrpc.RemoteServiceStub remoteServiceStub = RemoteServiceGrpc.newStub(gRPCCleanup.register(InProcessChannelBuilder
+            .forName(serverName)
+            .directExecutor()
+            .build()));
 
         StreamObserver<RemoteMessage> streamObserver = remoteServiceStub.call(new StreamObserver<Empty>() {
-            @Override public void onNext(Empty empty) {
+            @Override
+            public void onNext(Empty empty) {
 
             }
 
-            @Override public void onError(Throwable throwable) {
+            @Override
+            public void onError(Throwable throwable) {
 
             }
 
-            @Override public void onCompleted() {
+            @Override
+            public void onCompleted() {
 
             }
         });
@@ -128,11 +149,13 @@ public class RemoteServiceHandlerTestCase {
         private long long1;
         private long long2;
 
-        @Override public int remoteHashCode() {
+        @Override
+        public int remoteHashCode() {
             return 10;
         }
 
-        @Override public void deserialize(RemoteData remoteData) {
+        @Override
+        public void deserialize(RemoteData remoteData) {
             str1 = remoteData.getDataStrings(0);
             str2 = remoteData.getDataStrings(1);
             long1 = remoteData.getDataLongs(0);
@@ -144,7 +167,8 @@ public class RemoteServiceHandlerTestCase {
             Assert.assertEquals(20, long2);
         }
 
-        @Override public RemoteData.Builder serialize() {
+        @Override
+        public RemoteData.Builder serialize() {
             return null;
         }
     }
@@ -155,8 +179,9 @@ public class RemoteServiceHandlerTestCase {
             super(moduleDefineHolder);
         }
 
-        @Override public void in(Object o) {
-            TestRemoteData data = (TestRemoteData)o;
+        @Override
+        public void in(Object o) {
+            TestRemoteData data = (TestRemoteData) o;
 
             Assert.assertEquals("test1", data.str1);
             Assert.assertEquals("test2", data.str2);

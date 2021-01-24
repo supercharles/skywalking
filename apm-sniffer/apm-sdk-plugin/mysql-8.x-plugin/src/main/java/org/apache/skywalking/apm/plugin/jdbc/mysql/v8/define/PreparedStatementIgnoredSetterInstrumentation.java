@@ -16,19 +16,15 @@
  *
  */
 
-
 package org.apache.skywalking.apm.plugin.jdbc.mysql.v8.define;
 
 import org.apache.skywalking.apm.agent.core.plugin.interceptor.InstanceMethodsInterceptPoint;
 import org.apache.skywalking.apm.plugin.jdbc.PSSetterDefinitionOfJDBCInstrumentation;
 
-/**
- * @author kezhenxu94
- */
 public class PreparedStatementIgnoredSetterInstrumentation extends PreparedStatementInstrumentation {
 
     @Override
-    protected final InstanceMethodsInterceptPoint[] getInstanceMethodsInterceptPoints() {
+    public final InstanceMethodsInterceptPoint[] getInstanceMethodsInterceptPoints() {
         return new InstanceMethodsInterceptPoint[] {
             new PSSetterDefinitionOfJDBCInstrumentation(true)
         };

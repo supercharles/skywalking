@@ -18,7 +18,8 @@
 
 package org.apache.skywalking.aop.server.receiver.jaeger;
 
-import lombok.*;
+import lombok.Getter;
+import lombok.Setter;
 import org.apache.skywalking.oap.server.library.module.ModuleConfig;
 
 @Setter
@@ -28,5 +29,6 @@ public class JaegerReceiverConfig extends ModuleConfig {
     private int gRPCPort = -1;
     private int maxConcurrentCallsPerConnection;
     private int maxMessageSize;
-    private boolean registerJaegerEndpoint = true;
+    private int gRPCThreadPoolSize;
+    private int gRPCThreadPoolQueueSize;
 }
